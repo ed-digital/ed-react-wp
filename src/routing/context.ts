@@ -3,8 +3,8 @@ import Router, { Route } from './router'
 
 /* Routing Stuff */
 
-export const RouteItemContext = React.createContext<Route>(undefined)
-export const RouterContext = React.createContext<Router>(undefined)
+export const RouteItemContext = React.createContext<Route | null>(null)
+export const RouterContext = React.createContext<Router | null>(null)
 
 export function useRouter() {
   return React.useContext(RouterContext)

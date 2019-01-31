@@ -56,7 +56,12 @@ export function useAPI(method: string, args?: any): UseAPIResult {
   }
 
   React.useEffect(() => {
-    if (needsCall) {
+    // if (needsCall === false && JSON.stringify(argsToSend) !== JSON.stringify(args)) {
+    //   setNeedsCall(true)
+    //   setArgs(args)
+    //   return
+    // }
+    if (argsToSend) {
       let aborted = false
       setNeedsCall(false)
       setCallState('loading')
@@ -76,7 +81,7 @@ export function useAPI(method: string, args?: any): UseAPIResult {
     } else {
       return () => {}
     }
-  }, [JSON.stringify(argsToSend), callID])
+  }, [JSON.stringify(argsToSend), JSON.stringify(args), callID])
 
   return {
     callState: callState,

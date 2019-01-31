@@ -1,18 +1,6 @@
 import { parse as parseURL } from 'url'
 import { parse as parseQS, stringify as stringifyQS } from 'querystring'
-
-type RouteMeta = {
-  path: string
-  query: any
-}
-
-type RouteData = {
-  [index: string]: any
-}
-
-export type Route = RouteMeta & {
-  [index: string]: any
-}
+import { Route, RouteMeta } from './types'
 
 export type RouterEvent =
   | {
@@ -40,6 +28,12 @@ export type RouterEvent =
 type Subscriber = (route: RouterEvent) => void | any
 
 type Disposer = Function
+
+declare global {
+  interface Window {
+    INITIAL_PAGE: any
+  }
+}
 
 export default class Router {
   disposers: Disposer[] = []
@@ -92,10 +86,10 @@ export default class Router {
 
   getRouteMeta(url: string): RouteMeta {
     const parsed = parseURL(url)
-    const query = parseQS(parsed.query)
+    const query = parseQS(parsed.query || '')
 
     return {
-      path: parsed.pathname,
+      path: parsed.pathname || '',
       query: query || {}
     }
   }
@@ -185,6 +179,7 @@ export default class Router {
 
 function setEditButton(edit?: [string, string]) {
   const element = document.getElementById('wp-admin-bar-edit')
+  if (!element) return
   if (!edit) {
     element.innerHTML = ''
   } else {
@@ -195,7 +190,7 @@ function setEditButton(edit?: [string, string]) {
 }
 
 class RouterCache {
-  items = {}
+  items: { [key: string]: RouteData } = {}
 
   clear() {
     this.items = {}

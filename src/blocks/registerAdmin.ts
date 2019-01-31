@@ -1,25 +1,38 @@
 import { callAPI } from '../api'
 
-export default function(blockTypes) {
-  const blockMetas = []
+declare global {
+  interface Window {
+    wp: any
+  }
+}
 
-  console.log(blockTypes)
+export default function(
+  blockTypes: any,
+  wrap?: (props: { children: React.ReactNode }) => React.ReactNode
+) {
+  const blockMetas = []
 
   for (const ns in blockTypes) {
     const blocks = blockTypes[ns]
     for (const name in blocks) {
       const fullName = ns + '/' + name
       const module = blocks[name]
-      const blockType = module.default ? module.default : module
-      const existing = global['wp'].blocks.getBlockType(fullName)
+      const defaultModule = module.default ? module.default : module
+      const blockType =
+        typeof defaultModule === 'function' ? defaultModule(fullName) : defaultModule
+      const existing = window.wp.blocks.getBlockType(fullName)
       blockMetas.push({
         name: fullName,
         title: blockType.title
       })
+      if (wrap) {
+        const originalEdit = blockType.edit
+        blockType.edit = (...args: any[]) => wrap({ children: originalEdit(...args) })
+      }
       if (existing) {
         Object.assign(existing, blockType)
       } else {
-        global['wp'].blocks.registerBlockType(fullName, blockType)
+        window.wp.blocks.registerBlockType(fullName, blockType)
       }
     }
   }
