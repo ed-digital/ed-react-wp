@@ -1,27 +1,29 @@
-const coreFrontEnd = require('./default/*/*.tsx')
+import coreFrontEnd from './default'
+import { WPBlockTypeDef } from './type'
 
-export default function(blockTypes) {
-  const blockRenderers = {}
+let registeredBlocks: { [name: string]: WPBlockTypeDef<any> } = {}
 
-  for (const ns in coreFrontEnd) {
-    const blocks = coreFrontEnd[ns]
-    for (const name in blocks) {
-      const fullName = ns + '/' + name
-      const module = blocks[name]
-      const blockType = module.default ? module.default : module
-      blockRenderers[fullName] = blockType
+export default function(blockTypes: any) {
+  registeredBlocks = {}
+
+  const compile = (items: any) => {
+    for (const ns in items) {
+      const blocks = items[ns]
+      for (const name in blocks) {
+        const fullName = ns + '/' + name
+        console.log('Adding block type', fullName)
+        const module = blocks[name].default
+        const blockType = typeof module === 'function' ? module(fullName) : module
+        registeredBlocks[fullName] = blockType
+      }
     }
   }
 
-  for (const ns in blockTypes) {
-    const blocks = blockTypes[ns]
-    for (const name in blocks) {
-      const fullName = ns + '/' + name
-      const module = blocks[name]
-      const blockType = module.default ? module.default : module
-      blockRenderers[fullName] = blockType
-    }
-  }
+  compile(coreFrontEnd)
+  console.log('Core front end', coreFrontEnd)
+  compile(blockTypes)
+}
 
-  window['_ED_BLOCK_RENDERERS'] = blockRenderers
+export function getFrontEndBlocks() {
+  return registeredBlocks
 }

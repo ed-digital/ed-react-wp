@@ -25,6 +25,9 @@ export default function(
         name: fullName,
         title: blockType.title
       })
+      if (existing && blockType.edit) {
+        blockType.edit = existing.edit
+      }
       if (wrap) {
         const originalEdit = blockType.edit
         blockType.edit = (...args: any[]) => wrap({ children: originalEdit(...args) })

@@ -2,51 +2,24 @@ import * as React from 'react'
 import { callAPI } from '../api'
 import styled from 'styled-components'
 import { debounce } from 'throttle-debounce'
-
+import { BlockTypeDef, WPBlockTypeDef } from './type'
 /*
   This file provides a wrapper function for simplifying block declarations
 */
 
-type EditParams<Props> = {
-  setAttributes: (attrs: { [index: string]: any }) => void
-  attributes: Props
-}
-
-type BlockTypeDef<Props> = {
-  title: string
-  description: string
-  icon: any
-  category: string
-  supports?: any
-  attributes?: { [index: string]: any }
-  component: React.ComponentType<Props>
-  edit: React.ComponentType<EditParams<Props>>
-}
-
-type WPBlockTypeDef = {
-  title: string
-  description: string
-  icon: any
-  attributes?: { [index: string]: any }
-  category: string
-  edit: React.ComponentType<EditParams<any>>
-  save: Function
-  supports: {}
-}
-
-const fetchFieldValues = (vals: any, callback: (result: any) => void) => {
+const _getDynamicProps = (blockName: string, attributes: any, callback: (result: any) => void) => {
   let cancelled = false
-  console.log('Lookup')
   callAPI('getBlockData', {
-    data: vals
+    blockName: blockName,
+    attributes: attributes
   }).then(result => {
-    callback(result.data)
+    if (!cancelled) callback(result.data)
   })
   return () => (cancelled = true)
 }
 
 export function blockType<Props>(def: BlockTypeDef<Props>) {
-  return (fullName: string): WPBlockTypeDef => {
+  return (fullName: string): WPBlockTypeDef<Props> => {
     const EditComponent = def.edit
     return {
       title: def.title,
@@ -63,6 +36,9 @@ export function blockType<Props>(def: BlockTypeDef<Props>) {
         ...(def.attributes || {})
       },
       supports: def.supports || {},
+      render: props => {
+        return <def.component {...props} />
+      },
       edit: props => {
         // Hack ACF into display field types
         const hackedName = 'acf/' + fullName.replace(/\//, '-')
@@ -79,34 +55,34 @@ export function blockType<Props>(def: BlockTypeDef<Props>) {
         )
 
         // Debounce the ACF field lookup thing
-        const getACFFieldValues = React.useMemo(() => debounce(400, false, fetchFieldValues), [])
+        const getDynamicProps = React.useMemo(() => debounce(400, false, _getDynamicProps), [])
 
         // When unmounting, cancel any ACF lookups in progress
-        let cancelACFLookup: Function | null = null
-        React.useEffect(() => () => cancelACFLookup && cancelACFLookup())
+        let cancelDynamicProps: Function | null = null
+        React.useEffect(() => () => cancelDynamicProps && cancelDynamicProps())
 
-        const [acfProps, setACFProps] = React.useState<any>({})
-        const [acfPropsReady, setACFPropsReady] = React.useState<boolean>(false)
+        const [dynamicProps, setDynamicProps] = React.useState<any>({})
+        const [dynamicPropsReady, setDynamicPropsReady] = React.useState<boolean>(false)
 
         React.useEffect(() => {
           if (props.attributes.acfData) {
-            cancelACFLookup = getACFFieldValues(props.attributes.acfData, result => {
+            cancelDynamicProps = getDynamicProps(fullName, props.attributes, result => {
               if (result) {
-                setACFProps(result)
+                setDynamicProps(result)
               }
-              setACFPropsReady(true)
+              setDynamicPropsReady(true)
             })
           } else {
-            setACFPropsReady(true)
+            setDynamicPropsReady(true)
           }
         }, [])
 
         return (
           <React.Fragment>
-            {acfPropsReady ? (
+            {dynamicPropsReady ? (
               <EditComponent
                 {...props}
-                attributes={{ ...(props.attributes && props.attributes.data), ...acfProps }}
+                attributes={{ ...(props.attributes && props.attributes.data), ...dynamicProps }}
               />
             ) : (
               <Loading>Loading...</Loading>
@@ -121,16 +97,23 @@ export function blockType<Props>(def: BlockTypeDef<Props>) {
                   data: props.attributes.acfData
                 },
                 setAttributes: (attr: any) => {
-                  if (cancelACFLookup) cancelACFLookup()
-                  cancelACFLookup = getACFFieldValues(attr.data, result => {
-                    if (result) {
-                      setACFProps(result)
-                      // props.attributes.acfData = attr.data
-                      props.setAttributes({
-                        acfData: attr.data
-                      })
+                  if (cancelDynamicProps) cancelDynamicProps()
+                  cancelDynamicProps = getDynamicProps(
+                    fullName,
+                    {
+                      ...props.attributes,
+                      acfData: attr.data
+                    },
+                    result => {
+                      if (result) {
+                        setDynamicProps(result)
+                        // props.attributes.acfData = attr.data
+                        props.setAttributes({
+                          acfData: attr.data
+                        })
+                      }
                     }
-                  })
+                  )
                 },
                 name: hackedName
               })}

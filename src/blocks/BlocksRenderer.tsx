@@ -1,6 +1,7 @@
 import * as React from 'react'
-import { parse } from '@wordpress/block-serialization-default-parser'
+// import { parse } from '@wordpress/block-serialization-default-parser'
 import { Block } from './type'
+import { getFrontEndBlocks } from './registerFrontEnd'
 
 type BlockWrapper = (content: React.ReactNode, block: Block, parents: Block[]) => React.ReactNode
 
@@ -10,7 +11,8 @@ type Props = {
 }
 
 function getBlockList(items: Block[], parents: Block[], wrap?: BlockWrapper) {
-  const blockRenderers = window['_ED_BLOCK_RENDERERS']
+  const blockRenderers = getFrontEndBlocks()
+  console.log('Block renderes are', blockRenderers)
   return items
     .map((block: any, k: number) => {
       let content
@@ -18,11 +20,13 @@ function getBlockList(items: Block[], parents: Block[], wrap?: BlockWrapper) {
       // Attempt to render the block dynamically
       if (block.blockName in blockRenderers) {
         const blockType = blockRenderers[block.blockName]
+        console.log('Rendering block of type', block.blockName)
         if (blockType.render) {
-          content = blockType.render(
-            { ...block, attributes: block.attrs },
-            getBlockList(block.innerBlocks, [block, ...parents], wrap)
-          )
+          content = blockType.render({
+            ...block,
+            attributes: block.attrs,
+            innerBlocks: getBlockList(block.innerBlocks, [block, ...parents], wrap)
+          })
         }
       }
 
@@ -40,7 +44,5 @@ function getBlockList(items: Block[], parents: Block[], wrap?: BlockWrapper) {
 }
 
 export default function BlocksRenderer(props: Props) {
-  const items = typeof props.content === 'string' ? parse(props.content) : props
-  console.log(items)
-  return <span>{getBlockList(items, [], props.wrapBlock)}</span>
+  return <span>{getBlockList(props.content, [], props.wrapBlock)}</span>
 }

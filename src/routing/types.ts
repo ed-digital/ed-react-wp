@@ -20,6 +20,7 @@ export type ArchiveRoute = RouteMeta & {
 
 export type PageRoute = RouteMeta & {
   kind: 'page'
+  isFrontPage: boolean
   edit?: string
   template: string
   page: WPPost

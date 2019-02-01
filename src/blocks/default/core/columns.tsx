@@ -2,8 +2,8 @@ import * as React from 'react'
 import styled from 'styled-components'
 
 export default {
-  render: (block, children) => {
-    return <Wrapper>{children}</Wrapper>
+  render: props => {
+    return <Wrapper>{props.innerBlocks}</Wrapper>
   }
 }
 
