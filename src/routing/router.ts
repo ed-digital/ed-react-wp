@@ -100,7 +100,8 @@ export default class Router {
     return {
       key: 'route-' + ++this.routeCounter,
       path: parsed.pathname || '',
-      query: query || {}
+      query: query || {},
+      transitionConfig: null
     }
   }
 
@@ -152,9 +153,9 @@ export default class Router {
         type: 'finishedLoading',
         route: {
           ...meta,
-          ...routeData,
-          transitionConfig
-        }
+          ...routeData
+        },
+        transitionConfig
       })
     }
 
