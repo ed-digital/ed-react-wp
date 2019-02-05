@@ -1,8 +1,10 @@
 import { WPPost } from '../posts/post'
 
 export type RouteMeta = {
+  key: string
   path: string
   query: any
+  transitionConfig: any
 }
 
 export type ErrorRoute = RouteMeta & {

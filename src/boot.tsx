@@ -23,12 +23,10 @@ export default function(args: BootArgs) {
       document.body.appendChild(el)
       ReactDOM.render(<args.AdminComponent />, el)
     }
-    console.log('Admin')
     // We want more than 600px wide content
     setImmediate(() => {
-      console.log('HELLOO')
       const style = document.createElement('style')
-      style.innerHTML = '.wp-block { max-width: 100% !important; }'
+      // style.innerHTML = '.wp-block { max-width: 100% !important; }'
       document.head.appendChild(style)
     })
   } else {

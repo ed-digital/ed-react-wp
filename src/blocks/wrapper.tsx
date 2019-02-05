@@ -42,17 +42,20 @@ export function blockType<Props>(def: BlockTypeDef<Props>) {
       edit: props => {
         // Hack ACF into display field types
         const hackedName = 'acf/' + fullName.replace(/\//, '-')
-        const acfBlock = React.useMemo(
-          () =>
-            window.acf.newBlock({
-              clientId: String(Date.now()),
-              name: hackedName,
-              isValid: true,
-              originalContent: '',
-              attributes: {}
-            }),
-          []
-        )
+        const hasACF = !!wp.blocks.getBlockType(hackedName)
+        const acfBlock =
+          hasACF &&
+          React.useMemo(
+            () =>
+              window.acf.newBlock({
+                clientId: String(Date.now()),
+                name: hackedName,
+                isValid: true,
+                originalContent: '',
+                attributes: {}
+              }),
+            []
+          )
 
         // Debounce the ACF field lookup thing
         const getDynamicProps = React.useMemo(() => debounce(400, false, _getDynamicProps), [])
@@ -77,13 +80,12 @@ export function blockType<Props>(def: BlockTypeDef<Props>) {
           }
         }, [])
 
+        console.log(props)
+
         return (
           <React.Fragment>
             {dynamicPropsReady ? (
-              <EditComponent
-                {...props}
-                attributes={{ ...(props.attributes && props.attributes.data), ...dynamicProps }}
-              />
+              <EditComponent {...props} attributes={{ ...props.attributes, ...dynamicProps }} />
             ) : (
               <Loading>Loading...</Loading>
             )}
@@ -92,36 +94,44 @@ export function blockType<Props>(def: BlockTypeDef<Props>) {
               The only thing we care about rendering is the sidebar fields!
             */}
             <span style={{ display: 'none' }}>
-              {acfBlock.render({
-                attributes: {
-                  data: props.attributes.acfData
-                },
-                setAttributes: (attr: any) => {
-                  if (cancelDynamicProps) cancelDynamicProps()
-                  cancelDynamicProps = getDynamicProps(
-                    fullName,
-                    {
-                      ...props.attributes,
-                      acfData: attr.data
-                    },
-                    result => {
-                      if (result) {
-                        setDynamicProps(result)
-                        // props.attributes.acfData = attr.data
-                        props.setAttributes({
-                          acfData: attr.data
-                        })
+              {acfBlock &&
+                acfBlock.render({
+                  attributes: {
+                    data: props.attributes.acfData
+                  },
+                  setAttributes: (attr: any) => {
+                    if (cancelDynamicProps) cancelDynamicProps()
+                    cancelDynamicProps = getDynamicProps(
+                      fullName,
+                      {
+                        ...props.attributes,
+                        acfData: attr.data
+                      },
+                      result => {
+                        if (result) {
+                          setDynamicProps(result)
+                          // props.attributes.acfData = attr.data
+                          props.setAttributes({
+                            acfData: attr.data
+                          })
+                        }
                       }
-                    }
-                  )
-                },
-                name: hackedName
-              })}
+                    )
+                  },
+                  name: hackedName
+                })}
             </span>
           </React.Fragment>
         )
       },
-      save: () => null
+      save: () => {
+        const InnerBlocks = window.wp.editor.InnerBlocks
+        return (
+          <span>
+            <InnerBlocks.Content />
+          </span>
+        )
+      }
     }
   }
 }

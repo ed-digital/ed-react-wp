@@ -33,17 +33,15 @@ export function useMenu(props: WPMenuSelector) {
 
   const tree = data ? buildMenuTree(data, path) : []
 
-  console.log('Treee', tree)
-
   return { callState, tree, error }
 }
 
 function buildMenuTree(items: any[], currentPath: string): WPMenuItem[] {
   const tree = []
-  const leaves = {}
+  const leaves: { [index: string]: WPMenuItem } = {}
 
   for (const item of items) {
-    const node = (leaves[item.ID] = {
+    const node: WPMenuItem = (leaves[item.ID] = {
       id: item.ID,
       label: item.title,
       objectType: item.object,

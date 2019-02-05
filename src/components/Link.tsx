@@ -3,13 +3,20 @@ import { useRouter } from '../routing/context'
 
 type Props = {
   href: string
+  waitFor?: () => Promise<any>
+  transitionConfig?: any
   [key: string]: any
 }
 
 export default function Link(props: Props) {
   const router = useRouter()
 
-  React.useEffect(() => router.preload(props.href), [props.href])
+  React.useEffect(() => {
+    if (router) return router.preload(props.href)
+  }, [props.href])
+
+  let mounted = true
+  React.useEffect(() => () => (mounted = false), [])
 
   return (
     <a
@@ -17,12 +24,17 @@ export default function Link(props: Props) {
       href={props.href}
       target={props.target}
       {...props.attrs}
-      onClick={e => {
-        if (props.target && props.target !== '_self') return
-        if (props.onClick) props.onClick(e)
-        if (!e.isDefaultPrevented()) {
-          router.goTo(props.href, undefined)
-          e.preventDefault()
+      onClick={async e => {
+        if (router) {
+          if (props.target && props.target !== '_self') return
+          if (props.onClick) props.onClick(e)
+          if (!e.isDefaultPrevented()) {
+            e.preventDefault()
+            if (props.waitFor) {
+              await props.waitFor()
+            }
+            router.goTo(props.href, undefined, props.transitionConfig)
+          }
         }
       }}
     >

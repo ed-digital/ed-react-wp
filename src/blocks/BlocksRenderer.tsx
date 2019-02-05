@@ -12,7 +12,6 @@ type Props = {
 
 function getBlockList(items: Block[], parents: Block[], wrap?: BlockWrapper) {
   const blockRenderers = getFrontEndBlocks()
-  console.log('Block renderes are', blockRenderers)
   return items
     .map((block: any, k: number) => {
       let content
@@ -20,7 +19,6 @@ function getBlockList(items: Block[], parents: Block[], wrap?: BlockWrapper) {
       // Attempt to render the block dynamically
       if (block.blockName in blockRenderers) {
         const blockType = blockRenderers[block.blockName]
-        console.log('Rendering block of type', block.blockName)
         if (blockType.render) {
           content = blockType.render({
             ...block,

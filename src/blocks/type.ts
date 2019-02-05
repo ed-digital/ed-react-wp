@@ -18,6 +18,11 @@ export type EditParams<Props> = {
   attributes: Props
 }
 
+export type RenderParams<Props> = {
+  attributes: Props
+  innerBlocks: React.ReactNode[]
+}
+
 export type BlockTypeDef<Props> = {
   title: string
   description: string
@@ -25,7 +30,7 @@ export type BlockTypeDef<Props> = {
   category: string
   supports?: any
   attributes?: { [index: string]: any }
-  component: React.ComponentType<Props>
+  component: React.ComponentType<RenderParams<Props>>
   edit: React.ComponentType<EditParams<Props>>
 }
 

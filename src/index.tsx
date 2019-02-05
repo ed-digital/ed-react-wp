@@ -1,11 +1,18 @@
-import WPRouter from './routing/WPRouter'
-import { useRoute, useRouter } from './routing/context'
+export { default as WPRouter } from './routing/WPRouter'
+export { useRoute, useRouter, RouteItemContext } from './routing/context'
+export { Route } from './routing/types'
 import { callAPI, useAPI } from './api'
 import boot from './boot'
 import { useMenu } from './menus/useMenu'
 import Link from './components/Link'
 import './hacks'
 
+export { WPAttachment } from './files/type'
+export { WPImage } from './images/type'
 export * from './routing/types'
 export { blockType } from './blocks/wrapper'
-export { WPRouter, useRoute, useRouter, boot, callAPI, useAPI, useMenu, Link }
+
+export { usePageLoader, usePageLoaderConf, usePageLoadPromise } from './helpers/usePageLoader'
+export { useImage } from './helpers/useImage'
+
+export { boot, callAPI, useAPI, useMenu, Link }

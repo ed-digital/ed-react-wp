@@ -2,32 +2,40 @@ import { parse as parseURL } from 'url'
 import { parse as parseQS, stringify as stringifyQS } from 'querystring'
 import { Route, RouteMeta } from './types'
 
+type RouteData = Route
+
 export type RouterEvent =
   | {
       type: 'start'
       route: RouteMeta
+      transitionConfig: any
     }
   | {
       type: 'end'
       route: Route
+      wasBack: boolean
+      transitionConfig: any
     }
   | {
       type: 'beganLoading'
       route: RouteMeta
+      transitionConfig: any
     }
   | {
       type: 'errorLoading'
       route: RouteMeta
       error: Error
+      transitionConfig: any
     }
   | {
       type: 'finishedLoading'
       route: Route
+      transitionConfig: any
     }
 
 type Subscriber = (route: RouterEvent) => void | any
 
-type Disposer = Function
+type Disposer = () => void
 
 declare global {
   interface Window {
@@ -41,6 +49,7 @@ export default class Router {
   route: Route
 
   requestCounter: number = 0
+  routeCounter: number = 0
 
   cache = new RouterCache()
 
@@ -89,14 +98,18 @@ export default class Router {
     const query = parseQS(parsed.query || '')
 
     return {
+      key: 'route-' + ++this.routeCounter,
       path: parsed.pathname || '',
       query: query || {}
     }
   }
 
-  async goTo(url: string, popEvent: PopStateEvent) {
+  async goTo(url: string, popEvent?: PopStateEvent, transitionConfig?: any) {
     const requestID = ++this.requestCounter
-    history.pushState({}, '', url)
+
+    if (!popEvent) {
+      history.pushState({}, '', url)
+    }
 
     // Data we collect about the route
     let meta: RouteMeta = this.getRouteMeta(url)
@@ -108,7 +121,8 @@ export default class Router {
     // Publish the 'start' event
     this.publish({
       type: 'start',
-      route: meta
+      route: meta,
+      transitionConfig
     })
 
     // Check the cache first
@@ -117,7 +131,8 @@ export default class Router {
     } else {
       this.publish({
         type: 'beganLoading',
-        route: meta
+        route: meta,
+        transitionConfig
       })
       try {
         routeData = await this.fetchRouteData(url)
@@ -127,7 +142,8 @@ export default class Router {
         this.publish({
           type: 'errorLoading',
           route: meta,
-          error: err
+          error: err,
+          transitionConfig
         })
         console.error(err)
         return
@@ -136,7 +152,8 @@ export default class Router {
         type: 'finishedLoading',
         route: {
           ...meta,
-          ...routeData
+          ...routeData,
+          transitionConfig
         }
       })
     }
@@ -144,13 +161,20 @@ export default class Router {
     // Now set the route!
     this.route = {
       ...meta,
-      ...routeData
+      ...routeData,
+      transitionConfig
     }
     this.publish({
       type: 'end',
-      route: this.route
+      route: this.route,
+      wasBack: !!popEvent,
+      transitionConfig
     })
     this.didChange()
+  }
+
+  goBack() {
+    window.history.back()
   }
 
   /*
@@ -197,7 +221,7 @@ class RouterCache {
   }
 
   getCacheKey(meta: RouteMeta): string {
-    return btoa(JSON.stringify(meta))
+    return btoa(JSON.stringify({ ...meta, id: '' }))
   }
 
   has(meta: RouteMeta): boolean {
@@ -211,7 +235,7 @@ class RouterCache {
 
   get(meta: RouteMeta): RouteData {
     const key = this.getCacheKey(meta)
-    return this.items[key].data
+    return this.items[key]
   }
 
   set(meta: RouteMeta, data: RouteData) {

@@ -5,6 +5,7 @@ declare global {
   interface Window {
     React: any
     ReactDOM: any
+    wp: any
   }
 }
 
