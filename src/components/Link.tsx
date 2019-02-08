@@ -1,10 +1,13 @@
 import * as React from 'react'
+import { Route } from '../routing/types'
 import { useRouter } from '../routing/context'
 
 type Props = {
   href: string
+  className?: string
   waitFor?: () => Promise<any>
   transitionConfig?: any
+  then?: (route?: Route) => void
   [key: string]: any
 }
 
@@ -15,8 +18,8 @@ export default function Link(props: Props) {
     if (router) return router.preload(props.href)
   }, [props.href])
 
-  let mounted = true
-  React.useEffect(() => () => (mounted = false), [])
+  // let mounted = true
+  // React.useEffect(() => () => (mounted = false), [])
 
   return (
     <a
@@ -33,7 +36,10 @@ export default function Link(props: Props) {
             if (props.waitFor) {
               await props.waitFor()
             }
-            router.goTo(props.href, undefined, props.transitionConfig)
+            await router.goTo(props.href, undefined, props.transitionConfig)
+            if (props.then) {
+              props.then(router.route)
+            }
           }
         }
       }}
