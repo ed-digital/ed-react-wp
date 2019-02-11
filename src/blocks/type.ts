@@ -32,6 +32,7 @@ export type BlockTypeDef<Props> = {
   attributes?: { [index: string]: any }
   component: React.ComponentType<RenderParams<Props>>
   edit: React.ComponentType<EditParams<Props>>
+  parent?: string[]
 }
 
 export type WPBlockTypeDef<Props> = {
