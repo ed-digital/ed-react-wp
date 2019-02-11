@@ -1,7 +1,7 @@
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
-import { BlockType } from './blocks/type'
-import registerAdminBlockTypes from './blocks/registerAdmin'
+import { BlockType, WPBlockTypeDef } from './blocks/type'
+import registerAdminBlockTypes, { unregisterHiddenBlocks } from './blocks/registerAdmin'
 import registerFrontEndBlockTypes from './blocks/registerFrontEnd'
 
 import WPRouter from './routing/WPRouter'
@@ -9,6 +9,7 @@ import WPRouter from './routing/WPRouter'
 type BootArgs = {
   AppComponent: React.ComponentType
   AdminComponent?: React.ComponentType
+  filterBlockTypes?: (name: string, def: WPBlockTypeDef<any>) => boolean
   blockTypes: {
     [name: string]: BlockType
   }
@@ -23,12 +24,18 @@ export default function(args: BootArgs) {
       document.body.appendChild(el)
       ReactDOM.render(<args.AdminComponent />, el)
     }
-    // We want more than 600px wide content
-    setImmediate(() => {
-      const style = document.createElement('style')
-      // style.innerHTML = '.wp-block { max-width: 100% !important; }'
-      document.head.appendChild(style)
-    })
+    // Hide hidden blocks
+    setTimeout(() => {
+      unregisterHiddenBlocks()
+      if (args.filterBlockTypes) {
+        const types = [...wp.blocks.getBlockTypes()]
+        for (const type of types) {
+          if (!args.filterBlockTypes(type.name, type)) {
+            wp.blocks.unregisterBlockType(type.name)
+          }
+        }
+      }
+    }, 1000)
   } else {
     registerFrontEndBlockTypes(args.blockTypes)
     ReactDOM.render(
