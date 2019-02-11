@@ -43,3 +43,10 @@ export default function(
   // Send to the server, for ACF
   callAPI('activeBlockTypes', { types: blockMetas })
 }
+
+export function unregisterHiddenBlocks() {
+  const blockTypes = wp.blocks.getBlockTypes()
+  blockTypes
+    .filter((item: any) => item.keywords && item.keywords.indexOf('hidden') !== -1)
+    .forEach((item: any) => (item.category = 'none'))
+}
