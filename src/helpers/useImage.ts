@@ -3,67 +3,41 @@ import { usePageLoadPromise } from './usePageLoader'
 
 type ImageReadyState = 'loading' | 'error' | 'ready'
 
-type Image = {
-  src: string
-  readyState: ImageReadyState
-  width: number
-  height: number
-  duration: number
+function hasImageLoaded(img: HTMLImageElement | null) {
+  return img && img.complete
 }
 
-const preloadedImages: { [index: string]: HTMLImageElement } = {}
-
-export function useImage(src: string): Image {
-  const startTime = Date.now()
-  const img = React.useMemo(() => (preloadedImages[src] ? preloadedImages[src] : new Image()), [
-    src
-  ])
+export function useImage(ref: React.RefObject<HTMLImageElement>): ImageReadyState {
   const [readyState, setLoadState] = React.useState<ImageReadyState>(
-    preloadedImages[src] ? 'ready' : 'loading'
+    hasImageLoaded(ref.current) ? 'ready' : 'loading'
   )
-  const [endTime, setEndTime] = React.useState(0)
+
   const finishedLoading = usePageLoadPromise()
   React.useEffect(() => {
     let canceled = false
-    img.src = src
+    const img = ref.current
+    if (!img) return
     img.onerror = () => {
       if (canceled) return
       setLoadState('error')
       finishedLoading()
-      preloadedImages[src] = img
     }
+
     img.onload = () => {
       if (canceled) return
       setLoadState('ready')
-      setEndTime(Date.now())
       finishedLoading()
-      preloadedImages[src] = img
     }
 
-    if (img.complete && !endTime) {
+    if (hasImageLoaded(img) && readyState === 'loading') {
       if (canceled) return
       setLoadState('ready')
-      setEndTime(Date.now())
       finishedLoading()
-      preloadedImages[src] = img
     }
     return () => {
       canceled = true
     }
-  }, [src])
+  }, [ref.current])
 
-  let width = 0
-  let height = 0
-  if (readyState === 'ready') {
-    width = img.naturalWidth || img.width
-    height = img.naturalHeight || img.height
-  }
-
-  return {
-    src,
-    readyState,
-    width,
-    height,
-    duration: endTime - startTime
-  }
+  return readyState
 }
