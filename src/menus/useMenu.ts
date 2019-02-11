@@ -82,7 +82,6 @@ export function getMenuItemState(
 ): { active: boolean; childActive: boolean } {
   const itemPath = cleanPath(item.href)
   const currentPath = cleanPath(path)
-  console.log(itemPath, currentPath)
   let active = false
   let childActive = false
   if (itemPath === currentPath) {
