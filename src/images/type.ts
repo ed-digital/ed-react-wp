@@ -1,6 +1,6 @@
 import { WPAttachment } from '../files/type'
 
-export type WPImage = WPAttachment & {
+export type WPImageObject = WPAttachment & {
   type: 'image'
   sizes: {
     [size: string]: string | number
