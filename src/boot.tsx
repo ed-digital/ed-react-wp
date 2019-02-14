@@ -1,7 +1,7 @@
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import { BlockType, WPBlockTypeDef } from './blocks/type'
-import registerAdminBlockTypes, { unregisterHiddenBlocks } from './blocks/registerAdmin'
+import registerAdminBlockTypes from './blocks/registerAdmin'
 import registerFrontEndBlockTypes from './blocks/registerFrontEnd'
 
 import WPRouter from './routing/WPRouter'
@@ -18,24 +18,14 @@ type BootArgs = {
 
 export default function(args: BootArgs) {
   if (window.location.href.indexOf('wp-admin') !== -1) {
-    registerAdminBlockTypes(args.blockTypes, args.wrapAdminBlocks)
     if (args.AdminComponent) {
       const el = document.createElement('div')
       document.body.appendChild(el)
       ReactDOM.render(<args.AdminComponent />, el)
     }
+
     // Hide hidden blocks
-    setTimeout(() => {
-      unregisterHiddenBlocks()
-      if (args.filterBlockTypes) {
-        const types = [...wp.blocks.getBlockTypes()]
-        for (const type of types) {
-          if (!args.filterBlockTypes(type.name, type)) {
-            wp.blocks.unregisterBlockType(type.name)
-          }
-        }
-      }
-    }, 1000)
+    registerAdminBlockTypes(args.blockTypes, args.wrapAdminBlocks, args.filterBlockTypes)
   } else {
     registerFrontEndBlockTypes(args.blockTypes)
     ReactDOM.render(

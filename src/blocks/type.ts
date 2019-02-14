@@ -5,6 +5,7 @@ export type BlockType = {
   icon: string
   attributes?: any
   category: string
+  parent?: string[]
   edit: any
   save: any
 }
@@ -29,6 +30,7 @@ export type BlockTypeDef<Props> = {
   icon: any
   category: string
   supports?: any
+  parent?: string[]
   attributes?: { [index: string]: any }
   component: React.ComponentType<RenderParams<Props>>
   edit: React.ComponentType<EditParams<Props>>
@@ -41,6 +43,7 @@ export type WPBlockTypeDef<Props> = {
   icon: any
   attributes?: { [index: string]: any }
   category: string
+  parent?: string[]
   render: (props: { attributes: Props; innerBlocks: React.ReactNode }) => React.ReactNode
   edit: React.ComponentType<EditParams<Props>>
   save: Function

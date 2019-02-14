@@ -1,4 +1,5 @@
 import { callAPI } from '../api'
+import { BlockType, WPBlockTypeDef } from './type'
 
 declare global {
   interface Window {
@@ -8,7 +9,8 @@ declare global {
 
 export default function(
   blockTypes: any,
-  wrap?: (props: { children: React.ReactNode }) => React.ReactNode
+  wrap?: (props: { children: React.ReactNode }) => React.ReactNode,
+  filterBlockTypes?: (name: string, def: WPBlockTypeDef<any>) => boolean
 ) {
   const blockMetas = []
 
@@ -40,13 +42,30 @@ export default function(
     }
   }
 
+  // Hide hidden blocks
+  wp.domReady(() => {
+    unregisterHiddenBlocks()
+
+    // Filter out core blocks which we don't want
+    if (filterBlockTypes) {
+      const types = [...wp.blocks.getBlockTypes()]
+      for (const type of types) {
+        if (!filterBlockTypes(type.name, type)) {
+          wp.blocks.unregisterBlockType(type.name)
+        }
+      }
+    }
+
+    wp.blocks.setDefaultBlockName('none')
+  })
+
   // Send to the server, for ACF
   callAPI('activeBlockTypes', { types: blockMetas })
 }
 
-export function unregisterHiddenBlocks() {
+function unregisterHiddenBlocks() {
   const blockTypes = wp.blocks.getBlockTypes()
   blockTypes
     .filter((item: any) => item.keywords && item.keywords.indexOf('hidden') !== -1)
-    .forEach((item: any) => (item.category = 'none'))
+    .forEach((item: any) => (item.parent = ['no/parent']))
 }
