@@ -19,7 +19,7 @@ const _getDynamicProps = (blockName: string, attributes: any, callback: (result:
 }
 
 export function blockType<Props>(def: BlockTypeDef<Props>) {
-  return (fullName: string): WPBlockTypeDef<Props> => {
+  return (fullName: string, isAdmin: boolean): WPBlockTypeDef<Props> => {
     const EditComponent = def.edit
     return {
       title: def.title,
@@ -35,6 +35,7 @@ export function blockType<Props>(def: BlockTypeDef<Props>) {
         },
         ...(def.attributes || {})
       },
+      parent: def.parent || undefined,
       supports: def.supports || {},
       render: props => {
         return <def.component {...props} />
