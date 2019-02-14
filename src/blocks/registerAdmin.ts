@@ -23,6 +23,11 @@ export default function(
       const blockType =
         typeof defaultModule === 'function' ? defaultModule(fullName) : defaultModule
       const existing = window.wp.blocks.getBlockType(fullName)
+
+      if (!blockType) {
+        return console.error('Admin: ', fullName, 'did not export a module')
+      }
+
       blockMetas.push({
         name: fullName,
         title: blockType.title

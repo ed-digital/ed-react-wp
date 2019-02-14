@@ -13,6 +13,9 @@ export default function(blockTypes: any) {
         const fullName = ns + '/' + name
         const module = blocks[name].default
         const blockType = typeof module === 'function' ? module(fullName) : module
+        if (!blockType) {
+          return console.error('FrontEnd: ', fullName, 'did not export a module')
+        }
         if (blockType.override) {
           // An override block
           registeredBlocks[fullName] = blockType.getBlock(fullName, false)
