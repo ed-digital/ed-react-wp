@@ -16,4 +16,6 @@ export { overrideStandardBlock } from './blocks/override'
 export { usePageLoader, usePageLoaderConf, usePageLoadPromise } from './helpers/usePageLoader'
 export { useImage } from './helpers/useImage'
 
+export { InnerBlocks, RichText, MetaBox } from './components/Editor'
+
 export { boot, callAPI, useAPI, useMenu, Link }
