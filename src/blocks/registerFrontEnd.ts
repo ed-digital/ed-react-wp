@@ -14,7 +14,8 @@ export default function(blockTypes: any) {
         const module = blocks[name].default
         const blockType = typeof module === 'function' ? module(fullName) : module
         if (!blockType) {
-          return console.error('FrontEnd: ', fullName, 'did not export a module')
+          console.error('FrontEnd: ', fullName, 'did not export a module')
+          continue
         }
         if (blockType.override) {
           // An override block
