@@ -133,6 +133,10 @@ class ImageObject {
     return (size && size.src) || Placeholder.src
   }
 
+  static create(image: ACFImage): ImageObject {
+    return new ImageObject(image)
+  }
+
   // Returns a specific ImageSize Object
   // <img src={wpImg.size()}/>
   size(name: string = 'original', orientation: string = this.orientation): ImageSize {
