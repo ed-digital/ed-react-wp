@@ -124,7 +124,7 @@ class ImageObject {
   }
 
   // Returns a specific ImageSize Object
-  // <img src={wpImg.src()}/>
+  // <img src={wpImg.size()}/>
   size(name: string = 'original', orientation: string = this.orientation): ImageSize | undefined {
     return this.sizes.find(x => x.name === name && x.orientation === orientation)
   }
@@ -140,10 +140,6 @@ class ImageObject {
       }, [])
       .join(',\n')
   }
-}
-
-function prop(name: string, value: any) {
-  return (obj: any): boolean => obj[name] === value
 }
 
 export default ImageObject
