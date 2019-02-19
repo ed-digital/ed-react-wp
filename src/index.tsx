@@ -19,3 +19,5 @@ export { useImage } from './helpers/useImage'
 export { InnerBlocks, RichText, MetaBox } from './components/Editor'
 
 export { boot, callAPI, useAPI, useMenu, Link }
+
+export * from './util'

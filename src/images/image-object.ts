@@ -37,10 +37,12 @@ export interface ACFImage {
   }
 }
 
+export type MaybeACFImage = Falsey | ACFImage
+
 const Placeholder: ImageSize = {
   width: 720,
   height: 480,
-  src: `https://via.placeholder.com/720x480?text=New+Image`,
+  src: `https://via.placeholder.com/720x480/808080/808080/?text=`,
   name: `placeholder`,
   orientation: 'landscape'
 }
@@ -156,8 +158,8 @@ class ImageObject {
   }
 
   // Returns a srcset string
-  // <img srcset={wpImg.srcset()}/>
-  srcset(orientation: string = this.orientation): string {
+  // <img srcset={wpImg.srcSet()}/>
+  srcSet(orientation: string = this.orientation): string {
     return (
       this.sizes
         .filter(x => x.orientation === orientation)
@@ -169,10 +171,10 @@ class ImageObject {
     )
   }
 
-  static srcset(img: ACFImage | Falsey, orientation?: string): string {
+  static srcSet(img: ACFImage | Falsey, orientation?: string): string {
     if (img) {
       const image = new ImageObject(img)
-      return image.srcset(orientation || image.orientation)
+      return image.srcSet(orientation || image.orientation)
     }
 
     return Placeholder.src + ` ${Placeholder.width}w`

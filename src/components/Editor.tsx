@@ -16,6 +16,8 @@ export function RichText(props: RichTextProps) {
 
 interface InnerBlocks {
   allowedBlocks?: string[]
+  template?: any[]
+  templateLock: boolean | 'all' | 'insert'
 }
 
 export function InnerBlocks(props: InnerBlocks) {
