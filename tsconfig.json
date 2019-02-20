@@ -3,7 +3,7 @@
     "target": "es5",
     "module": "commonjs",
     "declaration": true,
-    "outDir": "./lib",
+    "outDir": "lib",
     "strict": true,
     "jsx": "react",
     "lib": [
@@ -12,6 +12,6 @@
       "dom"
     ]
   },
-  "include": ["src"],
-  "exclude": ["node_modules", "**/__tests__/*"]
+  "include": ["*.ts", "*.tsx"],
+  "exclude": ["node_modules", "**/__tests__/*", "lib"]
 }
