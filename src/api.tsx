@@ -67,13 +67,12 @@ export function useAPI(method: string, args?: any): UseAPIResult {
       setCallState('loading')
       callAPI(method, argsToSend).then(result => {
         if (aborted) return
+        setResponse(result)
         if (result.success) {
           setCallState('done')
         } else {
           setCallState('error')
         }
-        console.log('Result', result)
-        setResponse(result)
       })
       return () => {
         aborted = true

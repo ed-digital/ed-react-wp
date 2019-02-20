@@ -81,8 +81,6 @@ export function blockType<Props>(def: BlockTypeDef<Props>) {
           }
         }, [])
 
-        console.log(props)
-
         return (
           <React.Fragment>
             {dynamicPropsReady ? (

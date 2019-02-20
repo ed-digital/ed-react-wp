@@ -8,7 +8,7 @@ import Link from './components/Link'
 import './hacks'
 
 export { WPAttachment } from './files/type'
-export { WPImage } from './images/type'
+export { ACFImage, default as ImageObject } from './images/image-object'
 export * from './routing/types'
 export { blockType } from './blocks/wrapper'
 export { overrideStandardBlock } from './blocks/override'
