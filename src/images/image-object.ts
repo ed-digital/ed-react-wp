@@ -6,6 +6,8 @@ interface ImageSize {
   orientation: string
 }
 
+type Falsey = false | null | undefined
+
 export interface ACFImage {
   ID: number
   id: number
@@ -33,6 +35,16 @@ export interface ACFImage {
   sizes: {
     [name: string]: string | number
   }
+}
+
+export type MaybeACFImage = Falsey | ACFImage
+
+const Placeholder: ImageSize = {
+  width: 720,
+  height: 480,
+  src: `https://via.placeholder.com/720x480/808080/808080/?text=`,
+  name: `placeholder`,
+  orientation: 'landscape'
 }
 
 class ImageObject {
@@ -118,32 +130,55 @@ class ImageObject {
 
   // Returns a src string
   // <img src={wpImg.src()}/>
-  src(name: string = 'original', orientation: string = this.orientation): string | undefined {
+  src(name: string = 'original', orientation: string = this.orientation): string {
     const size = this.size(name, orientation)
-    return size && size.src
+    return (size && size.src) || Placeholder.src
+  }
+
+  static create(image: ACFImage): ImageObject {
+    return new ImageObject(image)
   }
 
   // Returns a specific ImageSize Object
-  // <img src={wpImg.src()}/>
-  size(name: string = 'original', orientation: string = this.orientation): ImageSize | undefined {
-    return this.sizes.find(x => x.name === name && x.orientation === orientation)
+  // <img src={wpImg.size()}/>
+  size(name: string = 'original', orientation: string = this.orientation): ImageSize {
+    return this.sizes.find(x => x.name === name && x.orientation === orientation) || Placeholder
+  }
+
+  /* 
+  get src on the image class
+  */
+  static src(img: ACFImage | Falsey, name: string = 'original'): string {
+    if (img) {
+      const image = new ImageObject(img)
+      return image.src(name)
+    }
+
+    return Placeholder.src
   }
 
   // Returns a srcset string
-  // <img srcset={wpImg.srcset()}/>
-  srcset(orientation: string = this.orientation): string {
-    return this.sizes
-      .filter(x => x.orientation === orientation)
-      .reduce((srcs: string[], size) => {
-        srcs.push(`${size.src} ${size.width}w`)
-        return srcs
-      }, [])
-      .join(',\n')
+  // <img srcset={wpImg.srcSet()}/>
+  srcSet(orientation: string = this.orientation): string {
+    return (
+      this.sizes
+        .filter(x => x.orientation === orientation)
+        .reduce((srcs: string[], size) => {
+          srcs.push(`${size.src} ${size.width}w`)
+          return srcs
+        }, [])
+        .join(',\n') || Placeholder.src + ` ${Placeholder.width}w`
+    )
   }
-}
 
-function prop(name: string, value: any) {
-  return (obj: any): boolean => obj[name] === value
+  static srcSet(img: ACFImage | Falsey, orientation?: string): string {
+    if (img) {
+      const image = new ImageObject(img)
+      return image.srcSet(orientation || image.orientation)
+    }
+
+    return Placeholder.src + ` ${Placeholder.width}w`
+  }
 }
 
 export default ImageObject
