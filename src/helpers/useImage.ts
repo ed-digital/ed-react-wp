@@ -43,12 +43,12 @@ export function useImage(ref: React.RefObject<HTMLImageElement>): ImageReadyStat
 
     // Disposer function
     return onEvents
-  }, [ref.current])
+  }, [ref.current && ref.current.src])
 
   return readyState
 }
 
 // Used to keep everything functional you know what I'm saying
 function caller(arr: (() => any)[]) {
-  return () => arr.map(fn => fn())
+  return () => arr.forEach(fn => fn())
 }

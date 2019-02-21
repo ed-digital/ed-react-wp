@@ -3,15 +3,11 @@
     "target": "es5",
     "module": "commonjs",
     "declaration": true,
-    "outDir": "./lib",
+    "outDir": "lib",
     "strict": true,
     "jsx": "react",
-    "lib": [
-      "es2017",
-      "es2017.object",
-      "dom"
-    ]
+    "lib": ["es2017", "es2017.object", "dom"]
   },
-  "include": ["src"],
-  "exclude": ["node_modules", "**/__tests__/*"]
+  "include": ["./src/**/*.ts", "./src/**/*.tsx"],
+  "exclude": ["node_modules", "**/__tests__/*", "lib"]
 }

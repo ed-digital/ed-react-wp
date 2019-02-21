@@ -1,4 +1,6 @@
-import React from 'react'
+import * as React from 'react'
+import styled from 'styled-components'
+import { inspect } from 'util'
 
 export default function dump(...args: any[]) {
   console.log(
@@ -11,9 +13,9 @@ export default function dump(...args: any[]) {
     )
   )
   return (
-    <div>
+    <Wrapper>
       {args.map((el, i) => {
-        const message = typeof el === 'object' && el !== null ? JSON.stringify(el, null, 2) : el
+        const message = typeof el === 'object' && el !== null ? inspect(el, { depth: 10 }) : `${el}`
         return (
           <pre key={message + i}>
             <p># {typeof el}</p>
@@ -21,6 +23,10 @@ export default function dump(...args: any[]) {
           </pre>
         )
       })}
-    </div>
+    </Wrapper>
   )
 }
+
+const Wrapper = styled.div`
+  position: relative;
+`
