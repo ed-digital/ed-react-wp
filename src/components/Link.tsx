@@ -2,6 +2,12 @@ import * as React from 'react'
 import { Route } from '../routing/types'
 import { useRouter } from '../routing/context'
 
+export interface ACFLink {
+  url: string
+  title: string
+  target: string
+}
+
 type Props = {
   href: string
   className?: string
