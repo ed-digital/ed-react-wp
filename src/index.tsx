@@ -7,8 +7,9 @@ import { useMenu } from './menus/useMenu'
 import './hacks'
 
 export { WPAttachment } from './files/type'
-export { WPImage } from './images/type'
+export { ACFImage, default as ImageObject } from './images/image-object'
 export { default as Link, ACFLink } from './components/Link'
+
 export * from './routing/types'
 export { blockType } from './blocks/wrapper'
 export { overrideStandardBlock } from './blocks/override'
