@@ -37,10 +37,14 @@ export function blockType<Props>(def: BlockTypeDef<Props>) {
       },
       parent: def.parent || undefined,
       supports: def.supports || {},
-      render: props => {
+      render: p => {
+        // Don't modify props. Use {...props, [key]:value}
+        const props = Object.freeze(p)
         return <def.component {...props} />
       },
-      edit: props => {
+      edit: p => {
+        // Don't modify props. Use {...props, [key]:value}
+        const props = Object.freeze(p)
         // Hack ACF into display field types
         const hackedName = 'acf/' + fullName.replace(/\//, '-')
         const hasACF = !!wp.blocks.getBlockType(hackedName)
@@ -65,8 +69,11 @@ export function blockType<Props>(def: BlockTypeDef<Props>) {
         let cancelDynamicProps: Function | null = null
         React.useEffect(() => () => cancelDynamicProps && cancelDynamicProps())
 
-        const [dynamicProps, setDynamicProps] = React.useState<any>({})
+        const [dP, setDynamicProps] = React.useState<any>({})
         const [dynamicPropsReady, setDynamicPropsReady] = React.useState<boolean>(false)
+
+        // Don't modify props. Use {...props, [key]:value}
+        const dynamicProps = Object.freeze(dP)
 
         React.useEffect(() => {
           if (props.attributes.acfData) {
@@ -84,7 +91,10 @@ export function blockType<Props>(def: BlockTypeDef<Props>) {
         return (
           <React.Fragment>
             {dynamicPropsReady ? (
-              <EditComponent {...props} attributes={{ ...props.attributes, ...dynamicProps }} />
+              <EditComponent
+                {...props}
+                attributes={Object.freeze({ ...dynamicProps, ...props.attributes })}
+              />
             ) : (
               <Loading>Loading...</Loading>
             )}
