@@ -62,7 +62,6 @@ export function MetaBox(props: { groupSlug: string }) {
         input.name = item.name
         input.value = item.value
       }
-      console.log('Data is', data)
     }, 1000)
 
     // acf.addFilter('prepare_for_ajax', () => {
