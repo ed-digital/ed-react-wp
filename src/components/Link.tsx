@@ -27,6 +27,8 @@ export default function Link(props: Props) {
   // let mounted = true
   // React.useEffect(() => () => (mounted = false), [])
 
+  const isAdmin = document.location.href.indexOf('wp-admin') !== -1
+
   return (
     <a
       className={props.className}
@@ -34,6 +36,10 @@ export default function Link(props: Props) {
       target={props.target}
       {...props.attrs}
       onClick={async e => {
+        if (isAdmin) {
+          e.preventDefault()
+          return
+        }
         if (router) {
           if (props.target && props.target !== '_self') return
           if (props.onClick) props.onClick(e)
