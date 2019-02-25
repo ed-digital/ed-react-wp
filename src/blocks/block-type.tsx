@@ -2,7 +2,6 @@ import * as React from 'react'
 import { callAPI } from '../api'
 import styled from 'styled-components'
 import { BlockTypeDef, WPBlockTypeDef } from './type'
-import { dump } from '../util'
 
 interface AcfBlock {
   block: {
