@@ -11,7 +11,7 @@ export { ACFImage, default as ImageObject } from './images/image-object'
 export { default as Link, ACFLink } from './components/Link'
 
 export * from './routing/types'
-export { blockType } from './blocks/wrapper'
+export { blockType } from './blocks/block-type'
 export { overrideStandardBlock } from './blocks/override'
 
 export { usePageLoader, usePageLoaderConf, usePageLoadPromise } from './helpers/usePageLoader'

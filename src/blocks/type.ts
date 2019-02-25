@@ -1,4 +1,4 @@
-import { ComponentType } from 'react'
+import * as React from 'react'
 
 export type BlockType = {
   title: string
@@ -21,7 +21,7 @@ export type EditParams<Props> = {
 
 export type RenderParams<Props> = {
   attributes: Props
-  innerBlocks: React.ReactNode[]
+  innerBlocks: React.ReactNode[] | React.ReactNode
 }
 
 export type BlockTypeDef<Props> = {
@@ -34,7 +34,6 @@ export type BlockTypeDef<Props> = {
   attributes?: { [index: string]: any }
   component: React.ComponentType<RenderParams<Props>>
   edit: React.ComponentType<EditParams<Props>>
-  parent?: string[]
 }
 
 export type WPBlockTypeDef<Props> = {
