@@ -53,9 +53,9 @@ function debounce(time: number, fetchFn: any) {
 
 const getDynamicProps = (blockName: any, attributes: any, fields: string[]) => {
   return new Promise(async resolve => {
-    /* 
+    /*
       Always stop previous getDynamicProps
-      Set update object equal to the blocks name and attributes   
+      Set update object equal to the blocks name and attributes
     */
     const serverUpdate = { blockName, attributes, fields }
 
@@ -70,7 +70,7 @@ const getDynamicProps = (blockName: any, attributes: any, fields: string[]) => {
 /*
   This file provides a wrapper function for simplifying block declarations
 
-  Block type is a function that returns another function 
+  Block type is a function that returns another function
   The inner function returns standard Gutenberg block
 */
 export function blockType<Props>(blockDefinition: BlockTypeDef<Props>) {
@@ -110,20 +110,20 @@ export function blockType<Props>(blockDefinition: BlockTypeDef<Props>) {
     const EditComponent = edit
 
     const GutenbergBlock: WPBlockTypeDef<Props> = {
-      /* 
+      /*
         Set up initial/default values
       */
       supports: {},
       parent: undefined,
       icon: '',
 
-      /* 
+      /*
         Overide the defaults
         (It wont contain the properites spread from above)
       */
       ...standardDefinition,
 
-      /* 
+      /*
         Add ED. attributes
       */
       attributes: {
@@ -132,7 +132,7 @@ export function blockType<Props>(blockDefinition: BlockTypeDef<Props>) {
         ...(vanillaFieldDefs || {})
       },
 
-      /* 
+      /*
         Add in render methods
           Would be interesting to only pass in edit={true/false} to the componenet instead of rendering something entirely different
           Just means the responsibility would be on the component to show Html or RichText
@@ -143,13 +143,13 @@ export function blockType<Props>(blockDefinition: BlockTypeDef<Props>) {
         const hackedName = 'acf/' + fullName.replace(/\//, '-')
         const hasACF = Boolean(wp.blocks.getBlockType(hackedName))
 
-        /* 
+        /*
           getUpdate.stop()
           to stop currently running update
         */
         const getUpdate = debounce(400, getDynamicProps)
 
-        /* 
+        /*
           If the block has acf data, then setup acf blocks,
           make this happen whenever hasACF updates
         */
@@ -166,7 +166,7 @@ export function blockType<Props>(blockDefinition: BlockTypeDef<Props>) {
           [hasACF]
         )
 
-        /* 
+        /*
           When re rendering this block will call getDynamicProps
         */
 
@@ -176,7 +176,7 @@ export function blockType<Props>(blockDefinition: BlockTypeDef<Props>) {
         // If the attributes has acfData attached
         React.useEffect(() => {
           const doEffect = async () => {
-            if (props.attributes.acfData) {
+            if (dynamicFields.length) {
               const result = await getUpdate(fullName, props.attributes, dynamicFields)
 
               if (result) {
