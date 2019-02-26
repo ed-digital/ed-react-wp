@@ -61,8 +61,6 @@ const getDynamicProps = (blockName: any, attributes: any, fields: string[]) => {
 
     const { data } = await callAPI('getBlockData', serverUpdate)
 
-    console.log(`data`, data, fields)
-
     resolve(data)
   })
 }
