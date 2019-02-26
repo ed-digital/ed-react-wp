@@ -2,7 +2,7 @@ import * as React from 'react'
 import styled from 'styled-components'
 
 interface RichTextProps {
-  onChange: (text: string) => void
+  onChange: (text: string) => any
   tagName: string
   value: string
   placeholder?: string
