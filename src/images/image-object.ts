@@ -39,12 +39,42 @@ export interface ACFImage {
 
 export type MaybeACFImage = Falsey | ACFImage
 
-const Placeholder: ImageSize = {
+const PlaceholderColor = 'E6E6E6'
+const Placeholder: ACFImage = {
   width: 720,
   height: 480,
-  src: `https://via.placeholder.com/720x480/808080/808080/?text=`,
   name: `placeholder`,
-  orientation: 'landscape'
+  ID: 0,
+  id: 0,
+  title: '',
+  filename: '',
+  description: '',
+  menu_order: 0,
+  filesize: 0,
+  url: `https://via.placeholder.com/720x480/${PlaceholderColor}/${PlaceholderColor}/?text=`,
+  link: `https://via.placeholder.com/720x480/${PlaceholderColor}/${PlaceholderColor}/?text=`,
+  alt: '',
+  author: '',
+  caption: ``,
+  status: '',
+  uploaded_to: 0,
+  date: new Date() + '', // Does '2018-10-13 02:07:25' count as a Date?
+  modified: new Date() + '',
+  mime_type: 'image/jpeg',
+  type: 'image',
+  subtype: 'jpeg',
+  icon: 'img',
+  sizes: {
+    large: `https://via.placeholder.com/1920x1080/${PlaceholderColor}/${PlaceholderColor}/?text=`,
+    'large-width': 720,
+    'large-height': 480,
+    square: `https://via.placeholder.com/720x720/${PlaceholderColor}/${PlaceholderColor}/?text=`,
+    'square-width': 720,
+    'square-height': 480,
+    portrait: `https://via.placeholder.com/480x720/${PlaceholderColor}/${PlaceholderColor}/?text=`,
+    'portrait-width': 480,
+    'portrait-height': 720
+  }
 }
 
 class ImageObject {
@@ -72,7 +102,7 @@ class ImageObject {
   sizes: ImageSize[]
   orientation: 'landscape' | 'square' | 'portrait'
 
-  constructor(image: ACFImage) {
+  constructor(image: ACFImage = Placeholder) {
     this.ID = image.ID
     this.id = image.id
     this.title = image.title
@@ -132,17 +162,20 @@ class ImageObject {
   // <img src={wpImg.src()}/>
   src(name: string = 'original', orientation: string = this.orientation): string {
     const size = this.size(name, orientation)
-    return (size && size.src) || Placeholder.src
+    return (size && size.src) || PlaceholderObject.src(name, orientation)
   }
 
-  static create(image: ACFImage): ImageObject {
+  static create(image: ACFImage = Placeholder): ImageObject {
     return new ImageObject(image)
   }
 
   // Returns a specific ImageSize Object
   // <img src={wpImg.size()}/>
   size(name: string = 'original', orientation: string = this.orientation): ImageSize {
-    return this.sizes.find(x => x.name === name && x.orientation === orientation) || Placeholder
+    return (
+      this.sizes.find(x => x.name === name && x.orientation === orientation) ||
+      PlaceholderObject.size(name, orientation)
+    )
   }
 
   /* 
@@ -154,7 +187,7 @@ class ImageObject {
       return image.src(name)
     }
 
-    return Placeholder.src
+    return ImageObject.src(Placeholder, name)
   }
 
   // Returns a srcset string
@@ -167,7 +200,7 @@ class ImageObject {
           srcs.push(`${size.src} ${size.width}w`)
           return srcs
         }, [])
-        .join(',\n') || Placeholder.src + ` ${Placeholder.width}w`
+        .join(',\n') || PlaceholderObject.src(orientation) + ` ${PlaceholderObject.width}w`
     )
   }
 
@@ -177,8 +210,10 @@ class ImageObject {
       return image.srcSet(orientation || image.orientation)
     }
 
-    return Placeholder.src + ` ${Placeholder.width}w`
+    return ImageObject.srcSet(Placeholder, orientation) + ` ${Placeholder.width}w`
   }
 }
+
+const PlaceholderObject = new ImageObject(Placeholder)
 
 export default ImageObject

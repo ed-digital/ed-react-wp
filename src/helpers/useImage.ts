@@ -12,16 +12,18 @@ function hasImageLoaded(img: HTMLImageElement | null) {
 const events: { [name: string]: ImageReadyState } = { error: 'error', load: 'ready' }
 const states = Object.entries(events)
 
-export function useImage(ref: React.RefObject<HTMLImageElement>): ImageReadyState {
-  const [readyState, setLoadState] = React.useState<ImageReadyState>(
-    hasImageLoaded(ref.current) ? 'ready' : 'loading'
-  )
+export function useImage(ref: React.RefObject<HTMLImageElement>, log = false): ImageReadyState {
+  const intialState = hasImageLoaded(ref.current) ? 'ready' : 'loading'
+  const [readyState, setLoadState] = React.useState<ImageReadyState>(intialState)
 
   /* Hook into page loading */
   const finishedLoading = usePageLoadPromise()
 
+  if (log) console.log('Ran with ref', ref)
+
   React.useEffect(() => {
     const img = ref.current
+    if (log) console.log('Ran with img', img)
     if (!img) return
 
     /* Returns a disposer function for each event:state */
@@ -41,9 +43,11 @@ export function useImage(ref: React.RefObject<HTMLImageElement>): ImageReadyStat
     /* Image is already ready! Should we check this before we hook events? */
     if (hasImageLoaded(img) && readyState === 'loading') update('ready')
 
+    if (log) console.log('img', img, 'readyState', readyState)
+
     // Disposer function
     return onEvents
-  }, [ref.current && ref.current.src])
+  }, [ref && ref.current && ref.current.src])
 
   return readyState
 }

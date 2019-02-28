@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { Route } from '../routing/types'
 import { useRouter } from '../routing/context'
+import { useInView } from 'react-intersection-observer'
 
 export interface ACFLink {
   url: string
@@ -20,17 +21,28 @@ type Props = {
 export default function Link(props: Props) {
   const router = useRouter()
 
-  React.useEffect(() => {
-    if (router) return router.preload(props.href)
-  }, [props.href])
+  const [ref, inView] = useInView({
+    threshold: 0,
+    rootMargin: `${window.innerHeight / 4}px`,
+    triggerOnce: true
+  })
 
-  // let mounted = true
-  // React.useEffect(() => () => (mounted = false), [])
+  /* Only pleload if this link has been in view for more than n seconds */
+  React.useEffect(() => {
+    const doPreload = () => {
+      if (router && inView) return router.preload(props.href)
+    }
+
+    const tm = setTimeout(doPreload, 4000)
+
+    return () => clearTimeout(tm)
+  }, [inView, props.href])
 
   const isAdmin = document.location.href.indexOf('wp-admin') !== -1
 
   return (
     <a
+      ref={ref}
       className={props.className}
       href={props.href}
       target={props.target}
