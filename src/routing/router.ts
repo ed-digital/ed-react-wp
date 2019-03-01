@@ -90,7 +90,7 @@ export default class Router {
   }
 
   preload(url: string) {
-    console.log('Preloading', url)
+    // console.log('Preloading', url)
   }
 
   getRouteMeta(url: string): RouteMeta {
