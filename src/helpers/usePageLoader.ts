@@ -108,7 +108,7 @@ export function usePageLoadPromise(): Function {
     }
   }, [])
   React.useEffect(() => {
-    console.log('Adding promise', promise, loader)
+    // console.log('Adding promise', promise, loader)
     loader.addPromise(promise)
   }, [])
   return resolve
