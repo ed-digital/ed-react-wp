@@ -53,11 +53,16 @@ function debounce(time: number, fetchFn: any) {
 
 const getDynamicProps = (blockName: any, attributes: any, fields: string[]) => {
   return new Promise(async resolve => {
+    /* 
+      Get the post being currently edited
+    */
+    const postId = window.wp.data.select('core/editor').getEditedPostAttribute('id')
+
     /*
       Always stop previous getDynamicProps
       Set update object equal to the blocks name and attributes
     */
-    const serverUpdate = { blockName, attributes, fields }
+    const serverUpdate = { blockName, attributes, fields, postId }
 
     const { data } = await callAPI('getBlockData', serverUpdate)
 
