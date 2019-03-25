@@ -1,5 +1,6 @@
 import { callAPI } from '../api'
 import { BlockType, WPBlockTypeDef } from './type'
+import registerFrontEnd from './registerFrontEnd'
 
 declare global {
   interface Window {
@@ -46,6 +47,8 @@ export default function(
       }
     }
   }
+
+  registerFrontEnd(blockTypes)
 
   // Hide hidden blocks
   wp.domReady(() => {
