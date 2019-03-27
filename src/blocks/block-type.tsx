@@ -195,7 +195,7 @@ export function blockType<Props>(blockDefinition: BlockTypeDef<Props>) {
 
           // When unmounting, cancel any ACF lookups in progress
           return () => getUpdate.stop()
-        }, [Object.values(acfBlock.data.data).join('|')])
+        }, [Object.values(acfBlock.data).join('|')])
 
         /*  */
         const attributes = { ...props.attributes, ...dynamicProps }
