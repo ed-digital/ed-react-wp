@@ -258,7 +258,7 @@ export function blockType<Props>(blockDefinition: BlockTypeDef<Props>) {
                     /* Only update if we actually have props */
                     if (result) {
                       setDynamicProps(result)
-                      // props.attributes.acfData = attr.data
+                      // propsetDynamicPropss.attributes.acfData = attr.data
                       props.setAttributes({
                         acfData: attr.data
                       })
