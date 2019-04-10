@@ -90,5 +90,3 @@ export function useAPI(method: string, args?: any): UseAPIResult {
     call
   }
 }
-
-window.callAPI = callAPI

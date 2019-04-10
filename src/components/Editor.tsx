@@ -37,6 +37,7 @@ export function MetaBox(props: { groupSlug: string }) {
     const clone = document.createElement('div')
     const originalParent = el.parentNode as HTMLDivElement
     originalParent.appendChild(clone)
+    // @ts-ignore
     ref.current.appendChild(el)
     // let wasSaving = false
     // const editor = wp.data.select('core/editor')
@@ -53,6 +54,7 @@ export function MetaBox(props: { groupSlug: string }) {
     // })
 
     let interval = setInterval(() => {
+      // @ts-ignore
       const data = window.jQuery(ref.current).serializeArray()
       clone.innerHTML = ''
       for (const item of data) {

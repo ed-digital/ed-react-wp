@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { usePageLoadPromise } from './usePageLoader'
-import { on } from '@_ed/wp'
+import { on } from '../'
 
 type ImageReadyState = 'loading' | 'error' | 'ready'
 

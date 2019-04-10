@@ -35,4 +35,5 @@ export function getFrontEndBlocks() {
   return registeredBlocks
 }
 
+// @ts-ignore
 window.getFrontEndBlocks = getFrontEndBlocks

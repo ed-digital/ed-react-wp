@@ -51,19 +51,23 @@ export default function(
   registerFrontEnd(blockTypes)
 
   // Hide hidden blocks
+  // @ts-ignore
   wp.domReady(() => {
     unregisterHiddenBlocks()
 
     // Filter out core blocks which we don't want
     if (filterBlockTypes) {
+      // @ts-ignore
       const types = [...wp.blocks.getBlockTypes()]
       for (const type of types) {
         if (!filterBlockTypes(type.name, type)) {
+          // @ts-ignore
           wp.blocks.unregisterBlockType(type.name)
         }
       }
     }
 
+    // @ts-ignore
     wp.blocks.setDefaultBlockName('none')
   })
 
@@ -72,6 +76,7 @@ export default function(
 }
 
 function unregisterHiddenBlocks() {
+  // @ts-ignore
   const blockTypes = wp.blocks.getBlockTypes()
   blockTypes
     .filter((item: any) => item.keywords && item.keywords.indexOf('hidden') !== -1)

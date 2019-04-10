@@ -198,6 +198,7 @@ export default class Router {
   }
 
   didChange() {
+    // @ts-ignore
     setEditButton(this.route.edit)
   }
 }

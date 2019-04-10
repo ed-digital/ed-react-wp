@@ -3,6 +3,13 @@ import { callAPI } from '../api'
 import styled from 'styled-components'
 import { BlockTypeDef, WPBlockTypeDef } from './type'
 
+declare global {
+  interface Window {
+    wp: any
+    acf: any
+  }
+}
+
 interface AcfBlock {
   block: {
     attributes: { [key: string]: any }
@@ -17,6 +24,7 @@ interface AcfBlock {
     mode: string
     name: string
   }
+  render: Function
 }
 
 interface Props {
@@ -53,7 +61,7 @@ function debounce(time: number, fetchFn: any) {
 
 const getDynamicProps = (blockName: any, attributes: any, fields: string[]) => {
   return new Promise(async resolve => {
-    /* 
+    /*
       Get the post being currently edited
     */
     const postId = window.wp.data.select('core/editor').getEditedPostAttribute('id')
@@ -162,7 +170,7 @@ export function blockType<Props>(blockDefinition: BlockTypeDef<Props>) {
       edit: props => {
         // Hack ACF into display field types
         const hackedName = 'acf/' + fullName.replace(/\//, '-')
-        const hasACF = Boolean(wp.blocks.getBlockType(hackedName))
+        const hasACF = Boolean(window.wp.blocks.getBlockType(hackedName))
 
         /*
           getUpdate.stop()
@@ -233,6 +241,7 @@ export function blockType<Props>(blockDefinition: BlockTypeDef<Props>) {
               {acfBlock &&
                 acfBlock.render({
                   attributes: {
+                    // @ts-ignore
                     data: props.attributes.acfData
                   },
                   setAttributes: async (attr: any) => {
@@ -246,9 +255,9 @@ export function blockType<Props>(blockDefinition: BlockTypeDef<Props>) {
                         ...props.attributes,
                         ...dynamicProps,
                         acfData: attr.data
-                        /* 
-                        TODO: Trying to make it so that you can update acf fields from setAttributes (it will only update keys in acfFields)  
-                          Will need to figure out how to map fieldNames to fieldIDs 
+                        /*
+                        TODO: Trying to make it so that you can update acf fields from setAttributes (it will only update keys in acfFields)
+                          Will need to figure out how to map fieldNames to fieldIDs
                         acfData: { ...getACFAttributes(props.attributes), ...attr.data }
                         */
                       },

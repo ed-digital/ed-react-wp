@@ -85,6 +85,7 @@ export function usePageLoader(): PageLoader {
     }
     state.loader = loader
     state.lastRoute = route
+    // @ts-ignore
     window.loader = loader
   }
   return state.loader

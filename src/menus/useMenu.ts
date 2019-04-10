@@ -29,6 +29,7 @@ export function useMenu(props: WPMenuSelector) {
     depth: props.depth
   })
 
+  // @ts-ignore
   const { path } = useRoute()
 
   const tree = data ? buildMenuTree(data, path) : []

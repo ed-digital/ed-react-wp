@@ -32,6 +32,7 @@ type Props = WPMenuSelector & Partial<MenuRenderers> & {}
 
 export default function WPMenu(props: Props) {
   const { tree } = useMenu(props)
+  // @ts-ignore
   const { path } = useRoute()
 
   return null
