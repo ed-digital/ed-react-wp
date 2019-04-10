@@ -10,8 +10,8 @@
   },
   "license": "MIT",
   "scripts": {
-    "build": "tsc --skipLibCheck",
-    "watch": "tsc -w --skipLibCheck"
+    "build": "rm -rf lib && tsc --skipLibCheck",
+    "watch": "rm -rf lib && tsc -w --skipLibCheck"
   },
   "devDependencies": {
     "@types/react": "^16.8.3",
