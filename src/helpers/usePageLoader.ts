@@ -108,11 +108,7 @@ export function usePageLoadPromise(key?: string): Function {
     }
   }, [])
   React.useEffect(() => {
-<<<<<<< HEAD
-    promise.name = key
-=======
     // console.log('Adding promise', promise, loader)
->>>>>>> f59287bad53d7f05107d40c709b4a8a12023ae6b
     loader.addPromise(promise)
   }, [])
   return resolve
