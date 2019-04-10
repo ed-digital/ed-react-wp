@@ -16,21 +16,26 @@ function getBlockList(items: Block[], parents: Block[], wrap?: BlockWrapper) {
     .map((block: any, k: number) => {
       let content
 
+      const name = block.blockName || block.name
+      const html = block.innerHTML || block.originalContent || ''
+      const attributes = block.attrs || block.attributes || {}
+
       // Attempt to render the block dynamically
-      if (block.blockName in blockRenderers) {
-        const blockType = blockRenderers[block.blockName]
+      if (name in blockRenderers) {
+        const blockType = blockRenderers[name]
         if (blockType.render) {
           content = blockType.render({
             ...block,
-            attributes: block.attrs,
+            attributes,
             innerBlocks: getBlockList(block.innerBlocks, [block, ...parents], wrap)
           })
         }
       }
 
       // Failing dynamic rendering, just spit out the innerHTML
-      if (content === undefined)
-        content = <span dangerouslySetInnerHTML={{ __html: block.innerHTML }} />
+      if (content === undefined) {
+        content = <span dangerouslySetInnerHTML={{ __html: html }} />
+      }
 
       // Wrap the content, if a wrap function was supplied
       if (wrap) content = wrap(content, block, parents)

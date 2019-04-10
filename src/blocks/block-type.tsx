@@ -53,11 +53,16 @@ function debounce(time: number, fetchFn: any) {
 
 const getDynamicProps = (blockName: any, attributes: any, fields: string[]) => {
   return new Promise(async resolve => {
+    /* 
+      Get the post being currently edited
+    */
+    const postId = window.wp.data.select('core/editor').getEditedPostAttribute('id')
+
     /*
       Always stop previous getDynamicProps
       Set update object equal to the blocks name and attributes
     */
-    const serverUpdate = { blockName, attributes, fields }
+    const serverUpdate = { blockName, attributes, fields, postId }
 
     const { data } = await callAPI('getBlockData', serverUpdate)
 
@@ -74,6 +79,7 @@ const getDynamicProps = (blockName: any, attributes: any, fields: string[]) => {
 export function blockType<Props>(blockDefinition: BlockTypeDef<Props>) {
   /* Test to see if a field is a custom dynamic one */
   const isDynamic = (str: string) => /acf|dynamic/.test(str)
+  const isACF = (str: string) => /acf/.test(str)
 
   /* Dont overwrite default values */
   for (const key of ['data', 'acfData']) {
@@ -84,13 +90,20 @@ export function blockType<Props>(blockDefinition: BlockTypeDef<Props>) {
     }
   }
 
+  const userAttributeEntries = Object.entries(blockDefinition.attributes || {})
+
   /* Pull keys that are of {type: 'acf' or 'dynamic'} */
-  const dynamicFields = Object.entries(blockDefinition.attributes || {})
+  const dynamicFields = userAttributeEntries
     .filter(([fieldName, fieldDef]) => isDynamic(fieldDef.type))
     .map(([key, _def]) => key)
 
+  /* Just ACF fields. To be used when using setAttibutes, so you can actually set acf fields from your component */
+  const acfFields = userAttributeEntries
+    .filter(([fieldName, fieldDef]) => isACF(fieldDef.type))
+    .map(([fieldName]) => fieldName)
+
   /* Normal fields that can mixed straight into the block definition */
-  const vanillaFieldDefs = Object.entries(blockDefinition.attributes || {})
+  const vanillaFieldDefs = userAttributeEntries
     .filter(([fieldName, fieldDef]) => !isDynamic(fieldDef.type))
     .reduce(
       (acc, [key, val]) => {
@@ -99,6 +112,16 @@ export function blockType<Props>(blockDefinition: BlockTypeDef<Props>) {
       },
       {} as { [key: string]: any }
     )
+
+  const getACFAttributes = (attrs: any) => {
+    return acfFields.reduce(
+      (res, field) => {
+        res[field] = attrs[field]
+        return res
+      },
+      {} as { [key: string]: any }
+    )
+  }
 
   /* Where is this function being called from? */
   return (fullName: string, isAdmin: boolean): WPBlockTypeDef<Props> => {
@@ -190,7 +213,7 @@ export function blockType<Props>(blockDefinition: BlockTypeDef<Props>) {
 
           // When unmounting, cancel any ACF lookups in progress
           return () => getUpdate.stop()
-        }, [Object.values(acfBlock.data.data).join('|')])
+        }, [Object.values((acfBlock && acfBlock.data && acfBlock.data.data) || {}).join('|')])
 
         /*  */
         const attributes = { ...props.attributes, ...dynamicProps }
@@ -223,6 +246,11 @@ export function blockType<Props>(blockDefinition: BlockTypeDef<Props>) {
                         ...props.attributes,
                         ...dynamicProps,
                         acfData: attr.data
+                        /* 
+                        TODO: Trying to make it so that you can update acf fields from setAttributes (it will only update keys in acfFields)  
+                          Will need to figure out how to map fieldNames to fieldIDs 
+                        acfData: { ...getACFAttributes(props.attributes), ...attr.data }
+                        */
                       },
                       dynamicFields
                     )
@@ -230,7 +258,7 @@ export function blockType<Props>(blockDefinition: BlockTypeDef<Props>) {
                     /* Only update if we actually have props */
                     if (result) {
                       setDynamicProps(result)
-                      // props.attributes.acfData = attr.data
+                      // propsetDynamicPropss.attributes.acfData = attr.data
                       props.setAttributes({
                         acfData: attr.data
                       })

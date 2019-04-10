@@ -29,16 +29,11 @@ export default function Link(props: Props) {
 
   /* Only pleload if this link has been in view for more than n seconds */
   React.useEffect(() => {
-    const doPreload = () => {
-      
-    }
+    const doPreload = () => {}
 
-    const tm = setTimeout(
-      () => {
-        if (router && inView) return router.preload(props.href)
-      }, 
-      4000
-      )
+    const tm = setTimeout(() => {
+      if (router && inView) return router.preload(props.href)
+    }, 4000)
 
     return () => clearTimeout(tm)
   }, [inView, props.href])

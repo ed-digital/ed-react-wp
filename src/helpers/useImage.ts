@@ -31,7 +31,7 @@ export function useImage(ref: React.RefObject<HTMLImageElement>, log = false): I
 
   React.useEffect(() => {
     const img = ref.current
-    if (!img) {
+    if (!img || readyState === 'ready') {
       finishedLoading()
       return
     }
