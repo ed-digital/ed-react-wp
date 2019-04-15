@@ -31,7 +31,12 @@ export type BlockTypeDef<Props> = {
   category: string
   supports?: any
   parent?: string[]
-  attributes?: { [index: string]: any }
+  attributes?: {
+    [index: string]: {
+      type: 'dynamic' | 'acf' | 'string' | 'object' | 'array' | 'boolean'
+      [key: string]: any
+    }
+  }
   component: React.ComponentType<RenderParams<Props>>
   edit: React.ComponentType<EditParams<Props>>
 }
