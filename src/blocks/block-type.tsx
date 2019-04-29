@@ -182,18 +182,24 @@ export function blockType<Props>(blockDefinition: BlockTypeDef<Props>) {
           If the block has acf data, then setup acf blocks,
           make this happen whenever hasACF updates
         */
-        const acfBlock: AcfBlock = React.useMemo(
-          () =>
-            hasACF &&
-            window.acf.newBlock({
-              clientId: String(Date.now()),
-              name: hackedName,
-              isValid: true,
-              originalContent: '',
-              attributes: {}
-            }),
-          [hasACF]
-        )
+        // const acfBlock: AcfBlock =
+        //   null &&
+        //   React.useMemo(
+        //     () =>
+        //       hasACF &&
+        //       window.acf.newBlock({
+        //         clientId: String(Date.now()),
+        //         name: hackedName,
+        //         isValid: true,
+        //         originalContent: '',
+        //         attributes: {}
+        //       }),
+        //     [hasACF]
+        //   )
+        // const acfBlock: AcfBlock | null = null
+        const acfBlock = wp.blocks.getBlockType(hackedName)
+
+        console.log('ACF BLocks is', hackedName, acfBlock)
 
         /*
           When re rendering this block will call getDynamicProps
@@ -221,11 +227,13 @@ export function blockType<Props>(blockDefinition: BlockTypeDef<Props>) {
 
           // When unmounting, cancel any ACF lookups in progress
           return () => getUpdate.stop()
-        }, [Object.values((acfBlock && acfBlock.data && acfBlock.data.data) || {}).join('|')])
+        }, [JSON.stringify(props.attributes)])
 
         /*  */
         const attributes = { ...props.attributes, ...dynamicProps }
+        console.log('Props for ' + hackedName, props)
 
+        const blockID = React.useMemo(() => String(Math.random()), [])
         return (
           <React.Fragment>
             {dynamicPropsReady ? (
@@ -237,44 +245,54 @@ export function blockType<Props>(blockDefinition: BlockTypeDef<Props>) {
               Here we're rendering the ACF block, but it'll all actually be hidden
               The only thing we care about rendering is the sidebar fields!
             */}
-            <span style={{ display: 'none' }}>
-              {acfBlock &&
-                acfBlock.render({
-                  attributes: {
-                    // @ts-ignore
-                    data: props.attributes.acfData
-                  },
-                  setAttributes: async (attr: any) => {
-                    /* Stop previous update */
-                    getUpdate.stop()
+            <span className="hidden-stuff" style={{ outline: '1px solid red' }}>
+              <wp.editor.InspectorControls>
+                {acfBlock &&
+                  acfBlock.edit({
+                    name: hackedName,
+                    attributes: {
+                      // @ts-ignore
+                      data: props.attributes.acfData,
+                      mode: 'auto',
+                      id: 'block_' + blockID,
+                      name: hackedName
+                    },
+                    clientId: blockID,
+                    name: hackedName,
+                    isSelected: true,
+                    isSelectionEnabled: true,
+                    setAttributes: async (attr: any) => {
+                      /* Stop previous update */
+                      getUpdate.stop()
 
-                    /* Get updated props from server */
-                    const result = await getUpdate(
-                      fullName,
-                      {
-                        ...props.attributes,
-                        ...dynamicProps,
-                        acfData: attr.data
-                        /*
-                        TODO: Trying to make it so that you can update acf fields from setAttributes (it will only update keys in acfFields)
-                          Will need to figure out how to map fieldNames to fieldIDs
-                        acfData: { ...getACFAttributes(props.attributes), ...attr.data }
-                        */
-                      },
-                      dynamicFields
-                    )
+                      /* Get updated props from server */
+                      const result = await getUpdate(
+                        fullName,
+                        {
+                          ...props.attributes,
+                          ...dynamicProps,
+                          acfData: attr.data
+                          /*
+                          TODO: Trying to make it so that you can update acf fields from setAttributes (it will only update keys in acfFields)
+                            Will need to figure out how to map fieldNames to fieldIDs
+                          acfData: { ...getACFAttributes(props.attributes), ...attr.data }
+                          */
+                        },
+                        dynamicFields
+                      )
 
-                    /* Only update if we actually have props */
-                    if (result) {
-                      setDynamicProps(result)
-                      // propsetDynamicPropss.attributes.acfData = attr.data
-                      props.setAttributes({
-                        acfData: attr.data
-                      })
-                    }
-                  },
-                  name: hackedName
-                })}
+                      /* Only update if we actually have props */
+                      if (result) {
+                        setDynamicProps(result)
+                        // propsetDynamicPropss.attributes.acfData = attr.data
+                        props.setAttributes({
+                          acfData: attr.data
+                        })
+                      }
+                    },
+                    name: hackedName
+                  })}
+              </wp.editor.InspectorControls>
             </span>
           </React.Fragment>
         )

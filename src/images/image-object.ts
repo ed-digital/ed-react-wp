@@ -174,11 +174,11 @@ class ImageObject {
   size(name: string = 'original', orientation: string = this.orientation): ImageSize {
     return (
       this.sizes.find(x => x.name === name && x.orientation === orientation) ||
-      PlaceholderObject.size(name, orientation)
+      PlaceholderObject.size('large', 'landscape')
     )
   }
 
-  /* 
+  /*
   get src on the image class
   */
   static src(img: ACFImage | Falsey, name: string = 'original'): string {
