@@ -166,7 +166,11 @@ export function blockType<Props>(blockDefinition: BlockTypeDef<Props>) {
           Would be interesting to only pass in edit={true/false} to the componenet instead of rendering something entirely different
           Just means the responsibility would be on the component to show Html or RichText
       */
-      render: props => <RenderComponent {...props} />,
+      render: props => (
+        <ErrorMessage message={() => null}>
+          <RenderComponent {...props} />
+        </ErrorMessage>
+      ),
       edit: props => {
         // Hack ACF into display field types
         const hackedName = 'acf/' + fullName.replace(/\//, '-')
@@ -237,7 +241,16 @@ export function blockType<Props>(blockDefinition: BlockTypeDef<Props>) {
         return (
           <React.Fragment>
             {dynamicPropsReady ? (
-              <EditComponent {...props} attributes={attributes} />
+              <ErrorMessage
+                message={() => (
+                  <LoadingBox>
+                    Looks like {blockDefinition.title} block is broken. If possible try adding
+                    content on the right, or contact ED. and we'll fix it up.
+                  </LoadingBox>
+                )}
+              >
+                <EditComponent {...props} attributes={attributes} />
+              </ErrorMessage>
             ) : (
               <LoadingBox>Loading...</LoadingBox>
             )}
@@ -308,6 +321,25 @@ export function blockType<Props>(blockDefinition: BlockTypeDef<Props>) {
     }
 
     return GutenbergBlock
+  }
+}
+
+class ErrorMessage extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = { hasError: false }
+  }
+  static getDerivedStateFromError(err) {
+    return {
+      hasError: err
+    }
+  }
+  render() {
+    if (this.state.error) {
+      return this.props.message()
+    }
+
+    return this.props.children
   }
 }
 
