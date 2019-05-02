@@ -205,9 +205,6 @@ export function blockType<Props>(blockDefinition: BlockTypeDef<Props>) {
         //   )
         // const acfBlock: AcfBlock | null = null
         const acfBlock = wp.blocks.getBlockType(hackedName)
-
-        console.log('ACF BLocks is', hackedName, acfBlock)
-
         /*
           When re rendering this block will call getDynamicProps
         */
@@ -238,7 +235,6 @@ export function blockType<Props>(blockDefinition: BlockTypeDef<Props>) {
 
         /*  */
         const attributes = { ...props.attributes, ...dynamicProps }
-        console.log('Props for ' + hackedName, props)
 
         const blockID = React.useMemo(() => String(Math.random()), [])
         return (
@@ -257,7 +253,8 @@ export function blockType<Props>(blockDefinition: BlockTypeDef<Props>) {
             <span className="hidden-stuff" style={{ outline: '1px solid red' }}>
               <wp.editor.InspectorControls>
                 {acfBlock &&
-                  acfBlock.edit({
+                  acfBlock.edit.call(acfBlock, {
+                    ...props,
                     name: hackedName,
                     attributes: {
                       // @ts-ignore
@@ -267,8 +264,7 @@ export function blockType<Props>(blockDefinition: BlockTypeDef<Props>) {
                       name: hackedName
                     },
                     clientId: blockID,
-                    name: hackedName,
-                    isSelected: true,
+                    isSelected: props.isSelected,
                     isSelectionEnabled: true,
                     setAttributes: async (attr: any) => {
                       /* Stop previous update */
@@ -298,8 +294,7 @@ export function blockType<Props>(blockDefinition: BlockTypeDef<Props>) {
                           acfData: attr.data
                         })
                       }
-                    },
-                    name: hackedName
+                    }
                   })}
               </wp.editor.InspectorControls>
             </span>
