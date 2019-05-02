@@ -2,6 +2,9 @@ import * as React from 'react'
 import { callAPI } from '../api'
 import styled from 'styled-components'
 import { BlockTypeDef, WPBlockTypeDef } from './type'
+import { shallowEqual } from '../util/shallow-equal'
+
+window.React2 = React
 
 declare global {
   interface Window {
@@ -241,14 +244,7 @@ export function blockType<Props>(blockDefinition: BlockTypeDef<Props>) {
         return (
           <React.Fragment>
             {dynamicPropsReady ? (
-              <ErrorMessage
-                message={() => (
-                  <LoadingBox>
-                    Looks like {blockDefinition.title} block is broken. If possible try adding
-                    content on the right, or contact ED. and we'll fix it up.
-                  </LoadingBox>
-                )}
-              >
+              <ErrorMessage {...props} message={errorMessage(blockDefinition.title)}>
                 <EditComponent {...props} attributes={attributes} />
               </ErrorMessage>
             ) : (
@@ -324,18 +320,41 @@ export function blockType<Props>(blockDefinition: BlockTypeDef<Props>) {
   }
 }
 
-class ErrorMessage extends React.Component {
+const cache = {}
+const errorMessage = (name: string) => {
+  return (
+    cache[name] ||
+    (cache[name] = () => (
+      <LoadingBox>
+        Looks like {name} block is broken. If possible try adding content on the right, or contact
+        ED. and we'll fix it.
+      </LoadingBox>
+    ))
+  )
+}
+
+interface ErrorMessageProps {
+  message: () => React.ReactNode
+}
+class ErrorMessage extends React.Component<ErrorMessageProps> {
+  state: { hasError: boolean }
   constructor(props) {
     super(props)
     this.state = { hasError: false }
   }
-  static getDerivedStateFromError(err) {
+  static getDerivedStateFromError() {
     return {
-      hasError: err
+      hasError: true
     }
   }
+  componentDidUpdate(prevProps) {
+    if (this.state.hasError && !shallowEqual(prevProps, this.props)) {
+      this.setState({ hasError: false })
+    }
+  }
+  componentDidCatch() {}
   render() {
-    if (this.state.error) {
+    if (this.state.hasError) {
       return this.props.message()
     }
 
