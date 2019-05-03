@@ -26,7 +26,7 @@ export function useImage(ref: React.RefObject<HTMLImageElement>, log = false): I
   const [readyState, setLoadState] = React.useState<ImageReadyState>(intialState)
 
   /* Hook into page loading */
-  const finishedLoading = usePageLoadPromise()
+  const finishedLoading = usePageLoadPromise(ref.current)
 
   let id = Math.floor(Math.random() * 5000)
 

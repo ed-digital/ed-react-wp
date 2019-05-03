@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { useRoute } from '../routing/context'
 import { Route } from '../routing/types'
+import Reactive from '../util/reactive/reactive'
 
 type PageLoaderConfig = {
   maxTime: number | ((...arg: any[]) => number)
@@ -12,112 +13,213 @@ type PageLoader = PageLoaderConfig & {
   isFirstLoad: boolean
   complete: boolean
   progress: number
-  promises: {
-    promise: Promise<any>
-    done: boolean
-  }[]
-  addPromise: (promise: Promise<any>) => void
+  completed: number
+  count: number
+  addPromise: (promise: Promise<any>, ref: any) => void
 }
 
-const state: { loader?: PageLoader; lastRoute?: Route } = {
+function wait<T = any>(
+  time: number
+): { finally: (...arg: any[]) => any; cancel: (...arg: any[]) => any } & Promise<T> & any {
+  let resolver
+  let tm: any
+
+  const promise = new Promise(resolve => {
+    resolver = resolve
+    tm = setTimeout(() => {
+      console.log('Time', time, 'done')
+      resolve()
+    }, time)
+  })
+
+  promise.then = promise.then.bind(promise)
+  promise.catch = promise.catch.bind(promise)
+
+  return {
+    ...promise,
+    resolve: resolver,
+    cancel: () => clearTimeout(tm)
+  }
+}
+
+const MINSTART = {}
+const MAXEND = {}
+
+const state: { loader?: PageLoader; lastRoute?: Route; updates: any[] } = {
   lastRoute: undefined,
-  loader: undefined
+  loader: undefined,
+  updates: []
 }
 
-export function usePageLoaderConf({ minTime, maxTime }: PageLoaderConfig) {
-  const loader = usePageLoader()
-  const minTimeVal = typeof minTime == 'function' ? minTime(loader) : minTime
-  const maxTimeVal = typeof maxTime == 'function' ? maxTime(loader) : maxTime
+function isDefined(val) {
+  if (val !== undefined) {
+    return val
+  }
+}
 
-  if (loader.minTime === 0 && minTimeVal > 0) {
-    loader.addPromise(new Promise(resolve => setTimeout(resolve, minTimeVal)))
+function whenDefined(val, initial) {
+  if (isDefined(val)) {
+    return val
   }
-  if (loader.maxTime === 0 && maxTimeVal > 0) {
-    loader.addPromise(new Promise(resolve => setTimeout(() => resolve('END_LOADER'), maxTimeVal)))
+  return initial
+}
+
+class Loader {
+  progress: number
+  count: number
+  completed: boolean
+  startTime: number
+
+  constructor(loader) {
+    this.isFirstLoad = whenDefined(loader.isFirstLoad, true)
+    this.startTime = whenDefined(loader.startTime, Date.now())
+    this.maxTime = whenDefined(loader.maxTime, () => 0)
+    this.minTime = whenDefined(loader.minTime, () => 0)
+    this.complete = whenDefined(loader.complete, false)
+    this.count = whenDefined(loader.count, 0)
+    this.completed = whenDefined(loader.completed, false)
+    this.route = whenDefined(loader.route, null)
+    this.progress = whenDefined(loader.progress, 0)
   }
-  loader.minTime = minTimeVal
-  loader.maxTime = maxTimeVal
+
+  addProgress() {
+    const clone = this.clone()
+    clone.progress = clone.progress + 1
+    return clone
+  }
+
+  clone() {
+    return new Loader(this)
+  }
+}
+
+export function usePageLoader(config?: PageLoaderConfig): PageLoader {
+  const route = useRoute()
+
+  const options = {
+    minTime: 0,
+    maxTime: 10000,
+    ...config
+  }
+
+  const minTimeFn = typeof options.minTime === 'function' ? options.minTime : () => options.minTime
+  const maxTimeFn = typeof options.maxTime === 'function' ? options.maxTime : () => options.maxTime
+
+  const [loader, setLoader] = React.useState(
+    state.loader || {
+      isFirstLoad: state.lastRoute === undefined,
+      startTime: Date.now(),
+      maxTime: maxTimeFn,
+      minTime: minTimeFn,
+      complete: false,
+      count: 0,
+      completed: 0,
+      route,
+      progress: 0
+    }
+  )
+
+  const setUpdates = (fn: any) => {
+    state.updates = fn(state.updates)
+  }
+
+  React.useEffect(() => {
+    if (loader.route !== route) {
+      state.lastRoute = route
+      setLoader(l => ({
+        ...l,
+        route
+      }))
+    }
+  }, [route])
+
+  const addPromise = async (promise: Promise<any>, promiseRef: any) => {
+    if (!state.updates.includes(promiseRef)) {
+      console.log('A')
+      setLoader(l => ({
+        ...l,
+        count: l.count + 1
+      }))
+      setUpdates((prev: any) => [...prev, promiseRef])
+
+      try {
+        const res = await promise
+        if (res === 'END_LOADER') {
+          console.log('B')
+          return setLoader(l => ({
+            ...l,
+            complete: true,
+            progress: l.complete ? 1 : (l.completed + 1) / (l.count + 1)
+          }))
+        }
+      } catch (err) {}
+
+      if (!loader.complete) {
+        console.log('C')
+        return setLoader(l => ({
+          ...l,
+          completed: l.completed + 1,
+          complete: l.completed === l.count,
+          progress: l.complete ? 1 : (l.completed + 1) / (l.count + 1)
+        }))
+      }
+    }
+  }
+
+  React.useEffect(() => {
+    window.loader = loader
+    state.loader = {
+      ...loader,
+      addPromise
+    }
+
+    const offs: any[] = []
+
+    if (loader.minTime) {
+      const waiter = wait(loader.minTime(loader))
+      addPromise(waiter, MINSTART)
+      offs.push(() => waiter.cancel())
+    }
+
+    if (loader.maxTime) {
+      const waiter = wait(loader.maxTime(loader))
+      addPromise(waiter, MAXEND)
+      offs.push(() => waiter.cancel())
+    }
+
+    return () => offs.forEach(off => off())
+  }, [loader])
+
   return loader
 }
 
-export function usePageLoader(): PageLoader {
-  const route = useRoute()
-  const [progress, setProgress] = React.useState(0)
+/* 
+Use page needs to return a function that marks the usePageLoadPromise as complete
+*/
 
-  if (!state.loader || route !== state.lastRoute) {
-    const checkProgress = () => {
-      /* We are seriously hoping the loader doesnt change */
-      if (state.loader !== loader) return
-      /* Return the percentage of promises complete */
-      const progress = loader.complete
-        ? 1
-        : loader.promises.filter(item => item.done).length / loader.promises.length
-      /*  */
-      loader.progress = progress
-      if (progress === 1) {
-        loader.promises = []
-      }
-
-      /*  */
-      setProgress(progress)
-    }
-    const loader: PageLoader = {
-      isFirstLoad: state.lastRoute === undefined,
-      startTime: Date.now(),
-      maxTime: 0,
-      minTime: 0,
-      promises: [],
-      complete: false,
-      progress: 0,
-      addPromise: (promise: Promise<any>) => {
-        const item = {
-          promise,
-          done: false
-        }
-        loader.promises.push(item)
-        promise
-          .then(val => {
-            if (val === 'END_LOADER') {
-              loader.complete = true
-            }
-            item.done = true
-            checkProgress()
-          })
-          .catch(() => {
-            item.done = true
-            checkProgress()
-          })
-        checkProgress()
-      }
-    }
-    state.loader = loader
-    state.lastRoute = route
-    // @ts-ignore
-    window.loader = loader
-  }
-  return state.loader
+const createPromise = () => {
+  let resolver
+  const promise = new Promise(resolve => (resolver = resolve))
+  return { promise, resolve: (resolver as unknown) as ((val: any) => any) }
 }
 
-export function usePageLoadPromise(key?: string): Function {
+export function usePageLoadPromise(key?: any): Function {
   const loader = usePageLoader()
-  const { promise, resolve } = React.useMemo(() => {
-    let resolve: Function
-    let done = false
-    const promise = new Promise(_resolve => {
-      if (done) return _resolve()
-      resolve = _resolve
-    })
-    return {
-      promise,
-      resolve: () => {
-        done = true
-        if (resolve) resolve()
-      }
-    }
-  }, [])
+  const [current, setCurrent] = React.useState(false)
+
+  if (!loader.addPromise) console.log(loader)
+
   React.useEffect(() => {
-    // console.log('Adding promise', promise, loader)
-    loader.addPromise(promise)
-  }, [])
-  return resolve
+    if (!current) {
+      setCurrent(createPromise())
+    } else {
+      console.log('Adding promise')
+      loader.addPromise(current.promise, key)
+    }
+  }, [current])
+
+  return () => {
+    current && current.resolve()
+    console.log('image-resolved')
+  }
 }
