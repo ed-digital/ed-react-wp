@@ -3,8 +3,8 @@ import { useRoute } from '../routing/context'
 import { Route } from '../routing/types'
 
 type PageLoaderConfig = {
-  maxTime: number
-  minTime: number
+  maxTime: number | ((...arg: any[]) => number)
+  minTime: number | ((...arg: any[]) => number)
 }
 
 type PageLoader = PageLoaderConfig & {
@@ -24,34 +24,41 @@ const state: { loader?: PageLoader; lastRoute?: Route } = {
   loader: undefined
 }
 
-export function usePageLoaderConf(config: PageLoaderConfig) {
+export function usePageLoaderConf({ minTime, maxTime }: PageLoaderConfig) {
   const loader = usePageLoader()
-  if (loader.minTime === 0 && config.minTime > 0) {
-    loader.addPromise(new Promise(resolve => setTimeout(resolve, config.minTime)))
+  const minTimeVal = typeof minTime == 'function' ? minTime(loader) : minTime
+  const maxTimeVal = typeof maxTime == 'function' ? maxTime(loader) : maxTime
+
+  if (loader.minTime === 0 && minTimeVal > 0) {
+    loader.addPromise(new Promise(resolve => setTimeout(resolve, minTimeVal)))
   }
-  // if (loader.maxTime === 0 && config.maxTime > 0) {
-  //   loader.addPromise(
-  //     new Promise(resolve => setTimeout(() => resolve('END_LOADER'), config.maxTime))
-  //   )
-  // }
-  loader.minTime = config.minTime
-  // loader.maxTime = config.maxTime
+  if (loader.maxTime === 0 && maxTimeVal > 0) {
+    loader.addPromise(new Promise(resolve => setTimeout(() => resolve('END_LOADER'), maxTimeVal)))
+  }
+  loader.minTime = minTimeVal
+  loader.maxTime = maxTimeVal
   return loader
 }
 
 export function usePageLoader(): PageLoader {
   const route = useRoute()
   const [progress, setProgress] = React.useState(0)
+
   if (!state.loader || route !== state.lastRoute) {
     const checkProgress = () => {
+      /* We are seriously hoping the loader doesnt change */
       if (state.loader !== loader) return
+      /* Return the percentage of promises complete */
       const progress = loader.complete
         ? 1
         : loader.promises.filter(item => item.done).length / loader.promises.length
+      /*  */
       loader.progress = progress
       if (progress === 1) {
         loader.promises = []
       }
+
+      /*  */
       setProgress(progress)
     }
     const loader: PageLoader = {

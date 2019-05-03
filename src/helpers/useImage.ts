@@ -9,9 +9,10 @@ const preloadedImages: { [src: string]: boolean } = {}
 
 function hasImageLoaded(img: HTMLImageElement | null) {
   if (!img) return false
-  const complete = img.complete || img.src in preloadedImages
+  const complete = img.complete || img.src || img.srcset
   if (complete) {
     preloadedImages[img.src] = true
+    preloadedImages[img.srcset] = true
   }
   return complete
 }
@@ -45,7 +46,7 @@ export function useImage(ref: React.RefObject<HTMLImageElement>, log = false): I
     */
     const update = (state: ImageReadyState) => {
       setLoadState(state)
-      if (state === 'ready') {
+      if (state === 'ready' || state === 'error') {
         finishedLoading()
       }
       onEvents()
