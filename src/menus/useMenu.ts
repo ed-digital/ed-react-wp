@@ -20,6 +20,7 @@ export type WPMenuItem = {
   children: WPMenuItem[]
   active: boolean
   childActive: boolean
+  menuOrder: number
 }
 
 export function useMenu(props: WPMenuSelector) {
@@ -51,6 +52,7 @@ function buildMenuTree(items: any[], currentPath: string): WPMenuItem[] {
       target: item.target,
       parent: Number(item.menu_item_parent),
       original: item,
+      menuOrder: item.menu_order,
       children: [],
       childActive: false,
       active: false
@@ -68,6 +70,7 @@ function buildMenuTree(items: any[], currentPath: string): WPMenuItem[] {
       tree.push(item)
     }
   }
+  tree.sort((a, b) => a.menuOrder - b.menuOrder)
   return tree
 }
 
