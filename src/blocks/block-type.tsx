@@ -3,6 +3,7 @@ import { callAPI } from '../api'
 import styled from 'styled-components'
 import { BlockTypeDef, WPBlockTypeDef } from './type'
 import { shallowEqual } from '../util/shallow-equal'
+import console = require('console')
 
 window.React2 = React
 
@@ -337,7 +338,8 @@ class ErrorMessage extends React.Component<ErrorMessageProps> {
     super(props)
     this.state = { hasError: false }
   }
-  static getDerivedStateFromError() {
+  static getDerivedStateFromError(err) {
+    console.log(err)
     return {
       hasError: true
     }
@@ -347,7 +349,6 @@ class ErrorMessage extends React.Component<ErrorMessageProps> {
       this.setState({ hasError: false })
     }
   }
-  componentDidCatch() {}
   render() {
     if (this.state.hasError) {
       return this.props.message()

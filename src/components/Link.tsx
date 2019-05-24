@@ -3,6 +3,8 @@ import { Route } from '../routing/types'
 import { useRouter } from '../routing/context'
 import { useInView } from 'react-intersection-observer'
 
+const isSelf = new RegExp(`^\/|^http(s)?\:\/\/${window.location.host}`)
+
 export interface ACFLink {
   url: string
   title: string
@@ -53,7 +55,9 @@ export default function Link(props: Props) {
           return
         }
         if (router) {
-          if (props.target && props.target !== '_self') return
+          if ((props.target && props.target !== '_self') || !isSelf.test(props.href)) {
+            return
+          }
           if (props.onClick) props.onClick(e)
           if (!e.isDefaultPrevented()) {
             e.preventDefault()
