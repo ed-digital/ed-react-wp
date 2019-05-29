@@ -3,7 +3,13 @@ import { Route } from '../routing/types'
 import { useRouter } from '../routing/context'
 import { useInView } from 'react-intersection-observer'
 
-const isSelf = new RegExp(`^\/|^http(s)?\:\/\/${window.location.host}`)
+const isInternalLink = (url: string) => {
+  return (
+    (url.indexOf(window.location.protocol + '//' + window.location.host) === 0 ||
+      url.match(/^\//)) &&
+    !url.match(/wp-content/)
+  )
+}
 
 export interface ACFLink {
   url: string
@@ -55,7 +61,7 @@ export default function Link(props: Props) {
           return
         }
         if (router) {
-          if ((props.target && props.target !== '_self') || !isSelf.test(props.href)) {
+          if ((props.target && props.target !== '_self') || !isInternalLink(props.href)) {
             return
           }
           if (props.onClick) props.onClick(e)

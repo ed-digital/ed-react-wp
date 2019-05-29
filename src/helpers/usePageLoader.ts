@@ -32,8 +32,10 @@ export function usePageLoaderConf({ minTime, maxTime }: PageLoaderConfig) {
   if (loader.minTime === 0 && minTimeVal > 0) {
     loader.addPromise(new Promise(resolve => setTimeout(resolve, minTimeVal)))
   }
-  if (loader.maxTime === 0 && maxTimeVal > 0) {
-    loader.addPromise(new Promise(resolve => setTimeout(() => resolve('END_LOADER'), maxTimeVal)))
+  if (loader.maxTime === 0) {
+    loader.addPromise(
+      new Promise(resolve => setTimeout(() => resolve('END_LOADER'), Number(maxTimeVal) || 1000))
+    )
   }
   loader.minTime = minTimeVal
   loader.maxTime = maxTimeVal
@@ -51,7 +53,7 @@ export function usePageLoader(): PageLoader {
       /* Return the percentage of promises complete */
       const progress = loader.complete
         ? 1
-        : loader.promises.filter(item => item.done).length / loader.promises.length
+        : loader.promises.filter(item => item.done).length / (loader.promises.length - 1)
       /*  */
       loader.progress = progress
       if (progress === 1) {

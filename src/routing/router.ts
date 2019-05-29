@@ -78,14 +78,22 @@ export default class Router {
     this.subscribers.push(subscriber)
     return () => {
       const index = this.subscribers.indexOf(subscriber)
-      if (index !== -1) this.subscribers.splice(index, 1)
+      if (index !== -1) {
+        this.subscribers.splice(index, 1)
+      }
     }
   }
 
+  // Publish an event to all subscribers
+  // If a subscriber is added during this call, it wont be called
+  // If a subscriber is removed during this call, it wont be called
   publish(e: RouterEvent) {
-    for (let i = 0; i < this.subscribers.length; i++) {
-      const subscriber = this.subscribers[i]
-      subscriber(e)
+    const subscribers = [...this.subscribers]
+    for (let i = 0; i < subscribers.length; i++) {
+      const subscriber = subscribers[i]
+      if (this.subscribers.indexOf(subscriber) !== -1) {
+        subscriber(e)
+      }
     }
   }
 
