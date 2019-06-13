@@ -238,6 +238,16 @@ export function blockType<Props>(blockDefinition: BlockTypeDef<Props>) {
         const attributes = { ...props.attributes, ...dynamicProps }
 
         const blockID = React.useMemo(() => String(Math.random()), [])
+        // const blockID = String(Math.random())
+
+        // console.log({
+        //   // @ts-ignore
+        //   data: props.attributes.acfData,
+        //   mode: 'auto',
+        //   id: 'block_' + blockID,
+        //   name: hackedName
+        // })
+
         return (
           <React.Fragment>
             {dynamicPropsReady ? (
@@ -251,7 +261,7 @@ export function blockType<Props>(blockDefinition: BlockTypeDef<Props>) {
               Here we're rendering the ACF block, but it'll all actually be hidden
               The only thing we care about rendering is the sidebar fields!
             */}
-            <span className="hidden-stuff" style={{ outline: '1px solid red' }}>
+            <span className="hidden-stuff">
               <wp.editor.InspectorControls>
                 {acfBlock &&
                   acfBlock.edit.call(acfBlock, {
@@ -260,12 +270,12 @@ export function blockType<Props>(blockDefinition: BlockTypeDef<Props>) {
                     attributes: {
                       // @ts-ignore
                       data: props.attributes.acfData,
-                      mode: 'auto',
+                      mode: 'edit',
                       id: 'block_' + blockID,
                       name: hackedName
                     },
                     clientId: blockID,
-                    isSelected: props.isSelected,
+                    isSelected: true,
                     isSelectionEnabled: true,
                     setAttributes: async (attr: any) => {
                       /* Stop previous update */
