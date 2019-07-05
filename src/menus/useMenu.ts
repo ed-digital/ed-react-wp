@@ -70,6 +70,12 @@ function buildMenuTree(items: any[], currentPath: string): WPMenuItem[] {
       tree.push(item)
     }
   }
+  for (const key in leaves) {
+    const item = leaves[key]
+    if (item.children) {
+      item.children.sort((a, b) => a.menuOrder - b.menuOrder)
+    }
+  }
   tree.sort((a, b) => a.menuOrder - b.menuOrder)
   return tree
 }

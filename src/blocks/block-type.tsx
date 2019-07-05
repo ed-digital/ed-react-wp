@@ -332,8 +332,8 @@ const errorMessage = (name: string) => {
     cache[name] ||
     (cache[name] = () => (
       <LoadingBox>
-        Looks like {name} block is broken. If possible try adding content on the right, or contact
-        ED. and we'll fix it.
+        An error occurred while preparing the "{name}" block. Try adjusting content in the sidebar
+        on the right.
       </LoadingBox>
     ))
   )

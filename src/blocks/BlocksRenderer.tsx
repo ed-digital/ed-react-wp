@@ -27,6 +27,8 @@ function getBlockList(items: Block[], parents: Block[], wrap?: BlockWrapper) {
           content = blockType.render({
             ...block,
             attributes,
+            prevBlock: items[k - 1],
+            nextBlock: items[k + 1],
             innerBlocks: getBlockList(block.innerBlocks, [block, ...parents], wrap)
           })
         }

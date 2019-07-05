@@ -14,7 +14,12 @@ export * from './routing/types'
 export { blockType } from './blocks/block-type'
 export { overrideStandardBlock } from './blocks/override'
 
-export { usePageLoader, usePageLoaderConf, usePageLoadPromise } from './helpers/usePageLoader'
+export {
+  usePageLoader,
+  usePageLoaderConf,
+  usePageLoadPromise,
+  useLatestLoader
+} from './helpers/usePageLoader'
 export { useImage } from './helpers/useImage'
 
 export { InnerBlocks, RichText, MetaBox } from './components/Editor'

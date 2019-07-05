@@ -42,11 +42,18 @@ export function usePageLoaderConf({ minTime, maxTime }: PageLoaderConfig) {
   return loader
 }
 
+export function useLatestLoader() {
+  const route = useRoute()
+  return () => route.loader
+}
+
 export function usePageLoader(): PageLoader {
   const route = useRoute()
   const [progress, setProgress] = React.useState(0)
 
-  if (!state.loader || route !== state.lastRoute) {
+  if (!route) return
+
+  if (!route.loader) {
     const checkProgress = () => {
       /* We are seriously hoping the loader doesnt change */
       if (state.loader !== loader) return
@@ -56,14 +63,10 @@ export function usePageLoader(): PageLoader {
         : loader.promises.filter(item => item.done).length / (loader.promises.length - 1)
       /*  */
       loader.progress = progress
-      if (progress === 1) {
-        loader.promises = []
-      }
 
-      /*  */
       setProgress(progress)
     }
-    const loader: PageLoader = {
+    const loader: PageLoader = (route.loader = {
       isFirstLoad: state.lastRoute === undefined,
       startTime: Date.now(),
       maxTime: 0,
@@ -91,13 +94,13 @@ export function usePageLoader(): PageLoader {
           })
         checkProgress()
       }
-    }
+    })
     state.loader = loader
     state.lastRoute = route
     // @ts-ignore
     window.loader = loader
   }
-  return state.loader
+  return route.loader
 }
 
 export function usePageLoadPromise(key?: string): Function {
@@ -118,7 +121,6 @@ export function usePageLoadPromise(key?: string): Function {
     }
   }, [])
   React.useEffect(() => {
-    // console.log('Adding promise', promise, loader)
     loader.addPromise(promise)
   }, [])
   return resolve

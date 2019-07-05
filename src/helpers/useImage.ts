@@ -38,7 +38,9 @@ export function useImage(ref: React.RefObject<HTMLImageElement>, log = false): I
     }
 
     /* Returns a disposer function for each event:state */
-    const onEvents = caller(states.map(([event, state]) => on(img, event, () => update(state))))
+    img.addEventListener('error', () => update('error'))
+    img.addEventListener('load', () => update('ready'))
+    // const onEvents = caller(states.map(([event, state]) => on(img, event, () => update(state))))
 
     /*
       Function to call when complete.
@@ -46,17 +48,18 @@ export function useImage(ref: React.RefObject<HTMLImageElement>, log = false): I
     */
     const update = (state: ImageReadyState) => {
       setLoadState(state)
+      console.log('Image state', state)
       if (state === 'ready' || state === 'error') {
         finishedLoading()
       }
-      onEvents()
+      // onEvents()
     }
 
     /* Image is already ready! Should we check this before we hook events? */
     if (hasImageLoaded(img) && readyState === 'loading') update('ready')
 
     // Disposer function
-    return onEvents
+    // return onEvents
   }, [ref && ref.current && ref.current.src])
 
   return readyState
