@@ -106,6 +106,7 @@ export function usePageLoader(): PageLoader {
 export function usePageLoadPromise(key?: string): Function {
   const loader = usePageLoader()
   const { promise, resolve } = React.useMemo(() => {
+    if (!loader) return {}
     let resolve: Function
     let done = false
     const promise = new Promise(_resolve => {
@@ -121,7 +122,9 @@ export function usePageLoadPromise(key?: string): Function {
     }
   }, [])
   React.useEffect(() => {
-    loader.addPromise(promise)
+    if (promise) {
+      loader.addPromise(promise)
+    }
   }, [])
   return resolve
 }

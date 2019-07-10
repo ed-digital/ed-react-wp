@@ -31,6 +31,7 @@ export function useImage(ref: React.RefObject<HTMLImageElement>, log = false): I
   let id = Math.floor(Math.random() * 5000)
 
   React.useEffect(() => {
+    if (!finishedLoading) return
     const img = ref.current
     if (!img || readyState === 'ready') {
       finishedLoading()
