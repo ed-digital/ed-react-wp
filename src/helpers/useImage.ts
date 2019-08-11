@@ -49,7 +49,6 @@ export function useImage(ref: React.RefObject<HTMLImageElement>, log = false): I
     */
     const update = (state: ImageReadyState) => {
       setLoadState(state)
-      console.log('Image state', state)
       if (state === 'ready' || state === 'error') {
         finishedLoading()
       }
