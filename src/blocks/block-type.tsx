@@ -205,7 +205,7 @@ export function blockType<Props>(blockDefinition: BlockTypeDef<Props>) {
         //     [hasACF]
         //   )
         // const acfBlock: AcfBlock | null = null
-        const acfBlock = wp.blocks.getBlockType(hackedName)
+        const acfBlock = window.wp.blocks.getBlockType(hackedName)
         /*
           When re rendering this block will call getDynamicProps
         */
@@ -262,7 +262,7 @@ export function blockType<Props>(blockDefinition: BlockTypeDef<Props>) {
               The only thing we care about rendering is the sidebar fields!
             */}
             <span className="hidden-stuff">
-              <wp.editor.InspectorControls>
+              <window.wp.editor.InspectorControls>
                 {acfBlock &&
                   acfBlock.edit.call(acfBlock, {
                     ...props,
@@ -307,7 +307,7 @@ export function blockType<Props>(blockDefinition: BlockTypeDef<Props>) {
                       }
                     }
                   })}
-              </wp.editor.InspectorControls>
+              </window.wp.editor.InspectorControls>
             </span>
           </React.Fragment>
         )

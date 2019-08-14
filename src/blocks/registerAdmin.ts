@@ -52,23 +52,23 @@ export default function(
 
   // Hide hidden blocks
   // @ts-ignore
-  wp.domReady(() => {
+  window.wp.domReady(() => {
     unregisterHiddenBlocks()
 
     // Filter out core blocks which we don't want
     if (filterBlockTypes) {
       // @ts-ignore
-      const types = [...wp.blocks.getBlockTypes()]
+      const types = [...window.wp.blocks.getBlockTypes()]
       for (const type of types) {
         if (!filterBlockTypes(type.name, type)) {
           // @ts-ignore
-          wp.blocks.unregisterBlockType(type.name)
+          window.wp.blocks.unregisterBlockType(type.name)
         }
       }
     }
 
     // @ts-ignore
-    wp.blocks.setDefaultBlockName('none')
+    window.wp.blocks.setDefaultBlockName('none')
   })
 
   // Send to the server, for ACF
@@ -77,7 +77,7 @@ export default function(
 
 function unregisterHiddenBlocks() {
   // @ts-ignore
-  const blockTypes = wp.blocks.getBlockTypes()
+  const blockTypes = window.wp.blocks.getBlockTypes()
   blockTypes
     .filter((item: any) => item.keywords && item.keywords.indexOf('hidden') !== -1)
     .forEach((item: any) => (item.parent = ['no/parent']))

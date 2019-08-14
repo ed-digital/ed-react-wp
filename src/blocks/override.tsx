@@ -11,7 +11,7 @@ export function overrideStandardBlock<Props>(
     override: true,
     getBlock: (fullName: string, isAdmin: boolean) => {
       // @ts-ignore
-      const existing = isAdmin ? wp.blocks.getBlockType(fullName) : {}
+      const existing = isAdmin ? window.wp.blocks.getBlockType(fullName) : {}
       if (!fullName) {
         console.error(`Cannot override block "${fullName}", as it has not been mounted.`)
         return
